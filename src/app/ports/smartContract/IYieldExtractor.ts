@@ -1,4 +1,4 @@
-import { BigNumber, ContractTransaction, Overrides } from 'ethers';
+import { BigNumber, ContractTransaction, Overrides } from '../../../adapters/providers/chain';
 import { YieldClaimedEvent } from '../../../generated/typechain/YieldExtractor';
 import { ClaimRequest } from '../../../types';
 

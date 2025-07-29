@@ -1,13 +1,17 @@
-import { ethers } from 'ethers';
+import { createPublicClient, http } from 'viem';
+import { base } from 'viem/chains';
 import { YelayLiteSdk } from '../../src';
 
-describe('Yield', () => {
+describe('Yield (Viem)', () => {
 	let sdk: YelayLiteSdk;
 
 	beforeAll(() => {
-		const provider = new ethers.providers.JsonRpcProvider('https://base.llamarpc.com');
+		const client = createPublicClient({
+			chain: base,
+			transport: http('https://base.llamarpc.com'),
+		});
 
-		sdk = new YelayLiteSdk(provider, 8453, 'ethers5', true);
+		sdk = new YelayLiteSdk(client, 8453, 'viem', true);
 	});
 
 	it.skip('Get Yields', async () => {
@@ -16,13 +20,13 @@ describe('Yield', () => {
 			toBlock: 26539965,
 		});
 
-		console.log('vaultsYield', vaultsYield);
+		console.log('[VIEM] vaultsYield', vaultsYield);
 	});
 
 	it.skip('Get Yields', async () => {
 		const yields = await sdk.yields.getYields();
 
-		console.log('userYield', yields);
+		console.log('[VIEM] userYield', yields);
 	});
 
 	it('Get Claimable Yield', async () => {
@@ -30,6 +34,6 @@ describe('Yield', () => {
 			user: '0x1892e547F4E1bA76F82a09C16C9F774744De1ff3',
 		});
 
-		console.log('claimableYield for user 0x1892e547F4E1bA76F82a09C16C9F774744De1ff3', claimableYield);
+		console.log('[VIEM] claimableYield for user 0x1892e547F4E1bA76F82a09C16C9F774744De1ff3', claimableYield);
 	}, 15000);
 });

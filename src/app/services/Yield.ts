@@ -1,5 +1,5 @@
-import { Provider } from '@ethersproject/providers';
-import { BigNumber, ContractTransaction, Overrides, Signer } from 'ethers';
+import { BigNumber, ContractTransaction, Overrides } from '@chain';
+import { IProviderAdapter } from '../../adapters/providers/IProviderAdapter';
 import { YieldBackend } from '../../adapters/backend/YieldBackend';
 import { SmartContractAdapter } from '../../adapters/smartContract';
 import { TimeFrame } from '../../types/backend';
@@ -21,18 +21,13 @@ import { IContractFactory } from '../ports/IContractFactory';
 export class Yield {
 	private smartContractAdapter: SmartContractAdapter;
 	private yieldBackend: IYieldBackend;
-	private signerOrProvider: Signer | Provider;
+	private adapter: IProviderAdapter;
 	private chainId: ChainId;
 
-	constructor(
-		contractFactory: IContractFactory,
-		backendUrl: string,
-		chainId: ChainId,
-		signerOrProvider: Signer | Provider,
-	) {
+	constructor(contractFactory: IContractFactory, backendUrl: string, chainId: ChainId, adapter: IProviderAdapter) {
 		this.smartContractAdapter = new SmartContractAdapter(contractFactory);
 		this.yieldBackend = new YieldBackend(backendUrl, chainId);
-		this.signerOrProvider = signerOrProvider;
+		this.adapter = adapter;
 		this.chainId = chainId;
 	}
 
@@ -78,12 +73,8 @@ export class Yield {
 	}
 
 	async getLastClaimEvent(params: GetLastClaimEventParams) {
-		let latestBlock = 0;
-		if (Signer.isSigner(this.signerOrProvider)) {
-			latestBlock = await this.signerOrProvider.provider!.getBlockNumber();
-		} else {
-			latestBlock = await this.signerOrProvider.getBlockNumber();
-		}
+		const provider = this.adapter.getProvider();
+		const latestBlock = await provider.getBlockNumber();
 
 		const lastClaimEvent = await this.smartContractAdapter.yieldExtractor.getLastClaimEvent(
 			params.user,
@@ -111,10 +102,12 @@ export class Yield {
 		);
 
 		return claimRequests.map((c, i) => {
-			const claimable = BigNumber.from(c.yieldSharesTotal).sub(claimedShares[i]);
+			const totalShares = BigNumber.from(c.yieldSharesTotal);
+			const claimedSharesAmount = BigNumber.from(claimedShares[i]);
+			const claimable = totalShares - claimedSharesAmount;
 			return {
 				claimable: claimable.toString(),
-				claimed: claimedShares[i].toString(),
+				claimed: claimedSharesAmount.toString(),
 				claimRequest: c,
 			};
 		});

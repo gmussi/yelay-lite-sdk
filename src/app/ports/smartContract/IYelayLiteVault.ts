@@ -1,4 +1,4 @@
-import { BigNumber, ContractTransaction, ethers, Overrides, Signer } from 'ethers';
+import { BigNumber, ContractTransaction, Overrides, Signer, BigNumberish } from '../../../adapters/providers/chain';
 import { ClientData, StrategyData } from '../../../types/smartContract';
 
 export type PoolsSupply = {
@@ -10,26 +10,26 @@ export type PoolsSupply = {
 export interface IYelayLiteVault {
 	getPoolsSupplies(vault: string, pools: number[]): Promise<PoolsSupply>;
 	allowance(signer: Signer, vault: string): Promise<BigNumber>;
-	approve(vault: string, amount: ethers.BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
+	approve(vault: string, amount: BigNumberish, overrides?: Overrides): Promise<ContractTransaction>;
 	deposit(
 		signer: Signer,
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigNumberish,
 		overrides?: Overrides,
 	): Promise<ContractTransaction>;
 	redeem(
 		signer: Signer,
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigNumberish,
 		overrides?: Overrides,
 	): Promise<ContractTransaction>;
 	migrate(
 		vault: string,
 		fromPool: number,
 		toPool: number,
-		amount: ethers.BigNumberish,
+		amount: BigNumberish,
 		overrides?: Overrides,
 	): Promise<ContractTransaction>;
 	activatePool(vault: string, pool: number, overrides?: Overrides): Promise<ContractTransaction>;

@@ -1,4 +1,4 @@
-import { BigNumber, ContractTransaction, Overrides } from 'ethers';
+import { BigNumber, ContractTransaction, Overrides } from '../providers/chain';
 import { IContractFactory } from '../../app/ports/IContractFactory';
 import { IYieldExtractor } from '../../app/ports/smartContract/IYieldExtractor';
 import { YieldClaimedEvent } from '../../generated/typechain/YieldExtractor';

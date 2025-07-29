@@ -1,8 +1,8 @@
-import { BigNumber, ContractTransaction, ethers, PayableOverrides } from 'ethers';
+import { BigNumber, ContractTransaction, PayableOverrides } from '../adapters/providers/chain';
 import { LibErrors__factory } from '../generated/typechain';
 import { ChainId } from '../types/config';
 
-export const tryCall = async (call: Promise<ethers.ContractTransaction>): Promise<ContractTransaction> => {
+export const tryCall = async (call: Promise<ContractTransaction>): Promise<ContractTransaction> => {
 	try {
 		return call;
 	} catch (error: any) {

@@ -9,4 +9,7 @@ module.exports = {
 			},
 		],
 	},
+	moduleNameMapper: {
+		'^@chain$': '<rootDir>/src/adapters/providers/chain.ts',
+	},
 };

@@ -1,4 +1,4 @@
-import { BigNumber } from 'ethers';
+import { BigNumber } from '@chain';
 
 export type PoolsTvl = {
 	id: number;

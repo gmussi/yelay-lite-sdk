@@ -10,7 +10,12 @@
 		"rootDir": "src",
 		"sourceMap": true,
 		"strict": true,
-		"types": ["jest", "node"]
+		"types": ["jest", "node"],
+		// Add baseUrl and paths for chain barrel alias
+		"baseUrl": ".",
+		"paths": {
+			"@chain": ["src/adapters/providers/chain.ts"]
+		}
 	},
 	"include": ["src/**/*"],
 	"exclude": ["node_modules", "**/__tests__/*", "tests/**/*"]

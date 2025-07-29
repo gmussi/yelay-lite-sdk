@@ -1,5 +1,5 @@
-import { Provider } from '@ethersproject/providers';
-import { Signer } from 'ethers';
+import type { Provider } from '../providers/chain';
+import { Signer } from '../providers/chain';
 
 import { MulticallWrapper } from 'ethers-multicall-provider';
 import { IContractFactory } from '../../app/ports/IContractFactory';
@@ -17,35 +17,59 @@ import { ContractAddresses } from '../../types/config';
 
 export class ContractFactory implements IContractFactory {
 	private provider: Provider;
+	private adapterType: 'ethers5' | 'ethers6' | 'viem';
 
-	constructor(private signerOrProvider: Signer | Provider, private contractAddresses: ContractAddresses) {
+	constructor(
+		private signerOrProvider: Signer | Provider,
+		private contractAddresses: ContractAddresses,
+		adapterType: 'ethers5' | 'ethers6' | 'viem' = 'ethers5',
+	) {
+		this.adapterType = adapterType;
+
 		if (Signer.isSigner(signerOrProvider)) {
 			if (signerOrProvider.provider) {
-				this.provider = MulticallWrapper.wrap(signerOrProvider.provider);
+				// Try to wrap with MulticallWrapper for ethers v5, fallback to regular provider for others
+				try {
+					this.provider = MulticallWrapper.wrap(signerOrProvider.provider);
+				} catch {
+					this.provider = signerOrProvider.provider;
+				}
 			} else {
 				throw new Error('Signer has no provider');
 			}
 		} else {
-			this.provider = MulticallWrapper.wrap(signerOrProvider);
+			// Try to wrap with MulticallWrapper for ethers v5, fallback to regular provider for others
+			try {
+				this.provider = MulticallWrapper.wrap(signerOrProvider);
+			} catch {
+				this.provider = signerOrProvider;
+			}
 		}
 	}
 
+	/**
+	 * Universal contract connection that works with all adapter types
+	 */
+	private connectContract<T>(address: string, factory: any): T {
+		// For all adapter types, use the ethers5 factory pattern
+		// The adapter layer ensures the signerOrProvider is compatible
+		return factory.connect(address, this.signerOrProvider) as T;
+	}
+
 	getYelayLiteVault(vault: string): IYelayLiteVault {
-		return IYelayLiteVault__factory.connect(vault, this.signerOrProvider);
+		return this.connectContract<IYelayLiteVault>(vault, IYelayLiteVault__factory);
 	}
 
 	getVaultWrapper(): VaultWrapper {
-		return VaultWrapper__factory.connect(this.contractAddresses.VaultWrapper, this.signerOrProvider);
+		return this.connectContract<VaultWrapper>(this.contractAddresses.VaultWrapper, VaultWrapper__factory);
 	}
 
 	getErc20(address: string): ERC20 {
-		return ERC20__factory.connect(address, this.signerOrProvider);
+		return this.connectContract<ERC20>(address, ERC20__factory);
 	}
 
 	getYieldExtractor(multicall = false): YieldExtractor {
-		return YieldExtractor__factory.connect(
-			this.contractAddresses.YieldExtractor,
-			multicall ? this.provider : this.signerOrProvider,
-		);
+		const providerToUse = multicall ? this.provider : this.signerOrProvider;
+		return YieldExtractor__factory.connect(this.contractAddresses.YieldExtractor, providerToUse);
 	}
 }

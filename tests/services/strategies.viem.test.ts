@@ -1,22 +1,26 @@
 import dotenv from 'dotenv';
-import { ethers } from 'ethers';
+import { createPublicClient, http } from 'viem';
+import { base } from 'viem/chains';
 import { YelayLiteSdk } from '../../src';
 
 dotenv.config();
 
-describe('Strategies', () => {
+describe('Strategies (Viem)', () => {
 	let sdk: YelayLiteSdk;
 
 	beforeAll(() => {
-		const provider = new ethers.providers.JsonRpcProvider('https://base.llamarpc.com');
+		const client = createPublicClient({
+			chain: base,
+			transport: http('https://base.llamarpc.com'),
+		});
 
-		sdk = new YelayLiteSdk(provider, 8453, 'ethers5', true);
+		sdk = new YelayLiteSdk(client, 8453, 'viem', true);
 	});
 
 	it('get protocols', async () => {
 		const protocols = await sdk.strategies.getProtocols();
 
-		console.log('[ETHERS5] protocols count:', protocols.length);
+		console.log('[VIEM] protocols count:', protocols.length);
 		expect(Array.isArray(protocols)).toBe(true);
 		if (protocols.length > 0) {
 			expect(protocols[0]).toHaveProperty('id');
@@ -26,6 +30,6 @@ describe('Strategies', () => {
 	it.skip('active strategies', async () => {
 		const activeStrategies = await sdk.strategies.getActiveStrategies('0x7b3D25c37c6ADf650F1f7696be2278cCFa2b638F');
 
-		console.log(activeStrategies);
+		console.log('[VIEM]', activeStrategies);
 	});
 });

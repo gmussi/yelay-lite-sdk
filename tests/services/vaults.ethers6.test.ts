@@ -1,24 +1,23 @@
 import dotenv from 'dotenv';
-import { ethers } from 'ethers';
-import { parseEther } from 'ethers/lib/utils';
+import { JsonRpcProvider, parseEther } from 'ethers-v6';
 import { YelayLiteSdk } from '../../src';
 
 dotenv.config();
 jest.setTimeout(200000);
 
-describe('Vaults', () => {
+describe('Vaults (Ethers v6)', () => {
 	let sdk: YelayLiteSdk;
 
 	beforeAll(() => {
-		const provider = new ethers.providers.JsonRpcProvider('https://base.meowrpc.com');
+		const provider = new JsonRpcProvider('https://base.meowrpc.com');
 
-		sdk = new YelayLiteSdk(provider, 8453, 'ethers5', true);
+		sdk = new YelayLiteSdk(provider, 8453, 'ethers6', true);
 	});
 
 	it('getVaults', async () => {
 		const vaults = await sdk.vaults.getVaults();
 
-		console.log('[ETHERS5] vaults count:', vaults.length);
+		console.log('[ETHERS6] vaults count:', vaults.length);
 		expect(vaults.length).toBeGreaterThan(0);
 		expect(vaults[0]).toHaveProperty('address');
 		expect(vaults[0]).toHaveProperty('name');
@@ -29,38 +28,35 @@ describe('Vaults', () => {
 	it.skip('get allowance', async () => {
 		const allowance = await sdk.vaults.allowance('0x98feddfdf4cb0b1813a7969fdbac5aecda8c6992');
 
-		console.log('allowance', allowance.toString());
+		console.log('[ETHERS6] allowance', allowance.toString());
 	});
 
 	it.skip('approve', async () => {
-		const approve = await sdk.vaults.approve(
-			'0x98feddfdf4cb0b1813a7969fdbac5aecda8c6992',
-			BigInt(parseEther('1').toString()),
-		);
+		const approve = await sdk.vaults.approve('0x98feddfdf4cb0b1813a7969fdbac5aecda8c6992', parseEther('1'));
 
-		console.log('approve', approve);
+		console.log('[ETHERS6] approve', approve);
 	});
 
 	it.skip('deposit eth', async () => {
 		const depositTx = await sdk.vaults.depositEth(
 			'0x98feddfdf4cb0b1813a7969fdbac5aecda8c6992',
 			100,
-			BigInt(parseEther('0.0000001').toString()),
+			parseEther('0.0000001'),
 		);
 
-		console.log('depositTx', depositTx.data);
+		console.log('[ETHERS6] depositTx', depositTx.data);
 	});
 
 	it.skip('deposit eth', async () => {
 		const depositTx = await sdk.vaults.deposit(
 			'0x98feddfdf4cb0b1813a7969fdbac5aecda8c6992',
 			100,
-			BigInt(parseEther('0.0001').toString()),
+			parseEther('0.0001'),
 		);
 
 		const receipt = await depositTx.wait();
 
-		console.log('redeem', (await receipt).status);
+		console.log('[ETHERS6] redeem', (await receipt).status);
 	});
 
 	it.skip('balance of', async () => {
@@ -70,7 +66,7 @@ describe('Vaults', () => {
 			'0x2bEeEc3887bb8EB97B0FFd1E11F26C4eF625e7B7',
 		);
 
-		console.log('balance', balance.toString());
+		console.log('[ETHERS6] balance', balance.toString());
 	});
 
 	it.skip('redeem', async () => {
@@ -80,10 +76,10 @@ describe('Vaults', () => {
 			'0x2bEeEc3887bb8EB97B0FFd1E11F26C4eF625e7B7',
 		);
 
-		const redeem = await sdk.vaults.redeem('0x98feddfdf4cb0b1813a7969fdbac5aecda8c6992', 100, balance.toBigInt());
+		const redeem = await sdk.vaults.redeem('0x98feddfdf4cb0b1813a7969fdbac5aecda8c6992', 100, balance);
 
 		const receipt = await redeem.wait();
 
-		console.log('redeem', (await receipt).status);
+		console.log('[ETHERS6] redeem', (await receipt).status);
 	});
 });

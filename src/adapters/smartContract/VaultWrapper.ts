@@ -1,4 +1,4 @@
-import { BigNumber, ContractTransaction, ethers, Overrides, PayableOverrides, Signer } from 'ethers';
+import { BigNumber, ContractTransaction, Overrides, PayableOverrides, Signer, BigNumberish } from '../providers/chain';
 import { IContractFactory } from '../../app/ports/IContractFactory';
 import { IVaultWrapper } from '../../app/ports/smartContract/IVaultWrapper';
 import { SwapArgsStruct } from '../../generated/typechain/VaultWrapper';
@@ -10,7 +10,7 @@ export class VaultWrapper implements IVaultWrapper {
 	public async depositEth(
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigNumberish,
 		overrides: PayableOverrides = {},
 	): Promise<ContractTransaction> {
 		const vaultWrapper = this.contractFactory.getVaultWrapper();
@@ -31,7 +31,7 @@ export class VaultWrapper implements IVaultWrapper {
 
 	public async approveVaultWrapper(
 		tokenAddress: string,
-		amount: ethers.BigNumberish,
+		amount: BigNumberish,
 		overrides: Overrides = {},
 	): Promise<ContractTransaction> {
 		const vaultWrapper = this.contractFactory.getVaultWrapper();
@@ -49,7 +49,7 @@ export class VaultWrapper implements IVaultWrapper {
 		vault: string,
 		pool: number,
 		swapData: SwapArgsStruct,
-		amount: ethers.BigNumberish,
+		amount: BigNumberish,
 		overrides: PayableOverrides = {},
 	): Promise<ContractTransaction> {
 		const vaultWrapper = this.contractFactory.getVaultWrapper();
