@@ -1,4 +1,4 @@
-import { BigNumber, ContractTransaction, Overrides } from '@chain';
+import { BigNumber, ContractTransaction, Overrides } from '../../adapters/providers/chain';
 import { IProviderAdapter } from '../../adapters/providers/IProviderAdapter';
 import { YieldBackend } from '../../adapters/backend/YieldBackend';
 import { SmartContractAdapter } from '../../adapters/smartContract';

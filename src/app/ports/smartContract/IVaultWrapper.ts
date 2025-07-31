@@ -1,4 +1,11 @@
-import { BigNumber, ContractTransaction, Overrides, PayableOverrides, BigNumberish, Signer } from '@chain';
+import {
+	BigNumber,
+	ContractTransaction,
+	Overrides,
+	PayableOverrides,
+	BigNumberish,
+	Signer,
+} from '../../../adapters/providers/chain';
 import { SwapArgsStruct } from '../../../generated/typechain/VaultWrapper';
 
 export interface IVaultWrapper {
