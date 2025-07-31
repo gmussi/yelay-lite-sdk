@@ -1,5 +1,4 @@
-import type { Provider } from '../providers/chain';
-import { Signer } from '../providers/chain';
+import { createChainAdapter, type Framework, type SignerType, type ProviderType } from '../providers/chain';
 
 import { MulticallWrapper } from 'ethers-multicall-provider';
 import { IContractFactory } from '../../app/ports/IContractFactory';
@@ -14,46 +13,33 @@ import {
 	YieldExtractor__factory,
 } from '../../generated/typechain';
 import { ContractAddresses } from '../../types/config';
+import { IProviderAdapter } from '../providers/IProviderAdapter';
 
-export class ContractFactory implements IContractFactory {
-	private provider: Provider;
-	private adapterType: 'ethers5' | 'ethers6' | 'viem';
+export class ContractFactory<T extends Framework = Framework> implements IContractFactory {
+	private provider: ProviderType<T>;
+	private adapter: ReturnType<typeof createChainAdapter<T>>;
+	private providerAdapter: IProviderAdapter;
 
 	constructor(
-		private signerOrProvider: Signer | Provider,
+		framework: T,
+		private signerOrProvider: SignerType<T> | ProviderType<T>,
 		private contractAddresses: ContractAddresses,
-		adapterType: 'ethers5' | 'ethers6' | 'viem' = 'ethers5',
+		providerAdapter?: IProviderAdapter,
 	) {
-		this.adapterType = adapterType;
+		this.adapter = createChainAdapter(framework);
+		this.providerAdapter = providerAdapter!;
 
-		if (Signer.isSigner(signerOrProvider)) {
-			if (signerOrProvider.provider) {
-				// Try to wrap with MulticallWrapper for ethers v5, fallback to regular provider for others
-				try {
-					this.provider = MulticallWrapper.wrap(signerOrProvider.provider);
-				} catch {
-					this.provider = signerOrProvider.provider;
-				}
-			} else {
-				throw new Error('Signer has no provider');
-			}
-		} else {
-			// Try to wrap with MulticallWrapper for ethers v5, fallback to regular provider for others
-			try {
-				this.provider = MulticallWrapper.wrap(signerOrProvider);
-			} catch {
-				this.provider = signerOrProvider;
-			}
-		}
+		// Use the provider adapter to get the correct provider format
+		this.provider = this.providerAdapter.getProvider() as ProviderType<T>;
 	}
 
 	/**
 	 * Universal contract connection that works with all adapter types
 	 */
-	private connectContract<T>(address: string, factory: any): T {
+	private connectContract<ContractType>(address: string, factory: any): ContractType {
 		// For all adapter types, use the ethers5 factory pattern
 		// The adapter layer ensures the signerOrProvider is compatible
-		return factory.connect(address, this.signerOrProvider) as T;
+		return factory.connect(address, this.provider as any) as ContractType;
 	}
 
 	getYelayLiteVault(vault: string): IYelayLiteVault {
@@ -69,7 +55,7 @@ export class ContractFactory implements IContractFactory {
 	}
 
 	getYieldExtractor(multicall = false): YieldExtractor {
-		const providerToUse = multicall ? this.provider : this.signerOrProvider;
-		return YieldExtractor__factory.connect(this.contractAddresses.YieldExtractor, providerToUse);
+		const providerToUse = multicall ? this.provider : this.provider;
+		return YieldExtractor__factory.connect(this.contractAddresses.YieldExtractor, providerToUse as any);
 	}
 }

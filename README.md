@@ -39,6 +39,33 @@ const sdk = new YelayLiteSdk(signerOrProvider, chainId, adapterType);
 
 ```
 
+## Chain Adapter Usage
+
+The SDK supports multiple web3 libraries through a flexible adapter system. You can import specific libraries directly:
+
+```ts
+// Import specific web3 library adapters
+import { ethers5 } from '@yelay-lite/sdk/adapters/providers/chain';
+import { ethers6 } from '@yelay-lite/sdk/adapters/providers/chain';
+import { viem } from '@yelay-lite/sdk/adapters/providers/chain';
+
+// Use ethers5 specific types and utilities
+const bigNumber = ethers5.BigNumber.from('1000000000000000000');
+const utils = ethers5.ethersUtils;
+
+// Use ethers6 specific types and utilities
+const bigNumberV6 = ethers6.BigNumber.from('1000000000000000000');
+const utilsV6 = ethers6.ethersUtils;
+
+// Use viem specific types and utilities
+const bigNumberViem = viem.BigNumber.from('1000000000000000000');
+const utilsViem = viem.ethersUtils;
+
+// Default import (ethers5 for backward compatibility)
+import chain from '@yelay-lite/sdk/adapters/providers/chain';
+const defaultBigNumber = chain.BigNumber.from('1000000000000000000');
+```
+
 ## Get vaults
 
 Get all vaults managed on network.

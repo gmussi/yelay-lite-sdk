@@ -1,16 +1,16 @@
 import dotenv from 'dotenv';
-import { JsonRpcProvider } from 'ethers-v6';
+import { JsonRpcProvider } from 'ethers-v6'; // Keep direct import for tests
 import { YelayLiteSdk } from '../../src';
 
 dotenv.config();
 
 describe('Pools (Ethers v6)', () => {
-	let sdk: YelayLiteSdk;
+	let sdk: YelayLiteSdk<'ethers6'>;
 
 	beforeAll(() => {
 		const provider = new JsonRpcProvider('https://base.llamarpc.com');
 
-		sdk = new YelayLiteSdk(provider, 8453, 'ethers6', true);
+		sdk = new YelayLiteSdk('ethers6', provider, 8453, true);
 	});
 
 	it('get projectsTVL', async () => {
@@ -40,7 +40,5 @@ describe('Pools (Ethers v6)', () => {
 		expect(firstTVL.poolId).toEqual(poolId);
 		expect(firstTVL.createTimestamp).toBeDefined();
 		expect(firstTVL.assets).toBeDefined();
-
-		console.log('[ETHERS6] Historical TVL data length:', paginatedResponse.data.length);
 	});
 });

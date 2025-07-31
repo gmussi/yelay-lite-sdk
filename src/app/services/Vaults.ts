@@ -1,23 +1,31 @@
 import { IProviderAdapter } from '../../adapters/providers/IProviderAdapter';
 import { BigNumber, CallOverrides, ContractTransaction, Overrides, BigNumberish } from '@chain';
 import { VaultsBackend } from '../../adapters/backend/VaultsBackend';
-import { SmartContractAdapter } from '../../adapters/smartContract';
 import { ClientData } from '../../types/smartContract';
 import { Vault } from '../../types/vaults';
 import { tryCall } from '../../utils/smartContract';
-import { IContractFactory } from '../ports/IContractFactory';
+import { IVaultWrapper } from '../ports/smartContract/IVaultWrapper';
+import { IYelayLiteVault } from '../ports/smartContract/IYelayLiteVault';
+import { IVaultsBackend } from '../ports/backend/IVaultsBackend';
 
 // Placeholder for SwapArgsStruct from typechain
 type SwapArgsStruct = any;
-import { IVaultsBackend } from '../ports/backend/IVaultsBackend';
 
 export class Vaults {
-	private smartContractAdapter: SmartContractAdapter;
+	private vaultWrapper: IVaultWrapper;
+	private yelayLiteVault: IYelayLiteVault;
 	private vaultsBackend: IVaultsBackend;
 	private adapter: IProviderAdapter;
 
-	constructor(contractFactory: IContractFactory, backendUrl: string, chainId: number, adapter: IProviderAdapter) {
-		this.smartContractAdapter = new SmartContractAdapter(contractFactory);
+	constructor(
+		vaultWrapper: IVaultWrapper,
+		yelayLiteVault: IYelayLiteVault,
+		backendUrl: string,
+		chainId: number,
+		adapter: IProviderAdapter,
+	) {
+		this.vaultWrapper = vaultWrapper;
+		this.yelayLiteVault = yelayLiteVault;
 		this.vaultsBackend = new VaultsBackend(backendUrl, chainId);
 		this.adapter = adapter;
 	}
@@ -47,7 +55,7 @@ export class Vaults {
 		amount: BigNumberish,
 		overrides?: Overrides,
 	): Promise<ContractTransaction> {
-		return tryCall(this.smartContractAdapter.vaultWrapper.depositEth(vault, pool, amount, overrides));
+		return tryCall(this.vaultWrapper.depositEth(vault, pool, amount, overrides));
 	}
 
 	/**
@@ -60,7 +68,7 @@ export class Vaults {
 		if (!signer) {
 			throw new Error('Signer not provided');
 		}
-		return this.smartContractAdapter.yelayLiteVault.allowance(signer, vault);
+		return this.yelayLiteVault.allowance(signer, vault);
 	}
 
 	/**
@@ -71,7 +79,7 @@ export class Vaults {
 	 * @returns A promise that resolves to a boolean indicating whether the pool ID is active.
 	 */
 	async poolActive(vault: string, pool: number): Promise<boolean> {
-		return this.smartContractAdapter.yelayLiteVault.poolActive(vault, pool);
+		return this.yelayLiteVault.poolActive(vault, pool);
 	}
 
 	/**
@@ -85,7 +93,7 @@ export class Vaults {
 	 *   - `clientName`: The name of the client decoded from a bytes32 string.
 	 */
 	async clientData(client: string, vault: string): Promise<ClientData> {
-		return this.smartContractAdapter.yelayLiteVault.clientData(client, vault);
+		return this.yelayLiteVault.clientData(client, vault);
 	}
 
 	/**
@@ -96,7 +104,7 @@ export class Vaults {
 	 * @returns {Promise<bigint>} A promise that resolves to the balance of the user in the specified pool.
 	 */
 	async balanceOf(vault: string, pool: number, user: string): Promise<BigNumber> {
-		return this.smartContractAdapter.yelayLiteVault.balanceOf(vault, pool, user);
+		return this.yelayLiteVault.balanceOf(vault, pool, user);
 	}
 
 	/**
@@ -107,7 +115,7 @@ export class Vaults {
 	 * @returns {Promise<ContractTransaction>} A promise that resolves to the result of the approval transaction.
 	 */
 	async approve(vault: string, amount: BigNumberish, overrides?: Overrides): Promise<ContractTransaction> {
-		return tryCall(this.smartContractAdapter.yelayLiteVault.approve(vault, amount, overrides));
+		return tryCall(this.yelayLiteVault.approve(vault, amount, overrides));
 	}
 
 	/**
@@ -122,7 +130,7 @@ export class Vaults {
 		amount: BigNumberish,
 		overrides?: Overrides,
 	): Promise<ContractTransaction> {
-		return tryCall(this.smartContractAdapter.vaultWrapper.approveVaultWrapper(tokenAddress, amount, overrides));
+		return tryCall(this.vaultWrapper.approveVaultWrapper(tokenAddress, amount, overrides));
 	}
 
 	/**
@@ -135,7 +143,7 @@ export class Vaults {
 		if (!signer) {
 			throw new Error('Signer not provided');
 		}
-		return this.smartContractAdapter.vaultWrapper.vaultWrapperAllowance(signer, tokenAddress);
+		return this.vaultWrapper.vaultWrapperAllowance(signer, tokenAddress);
 	}
 
 	/**
@@ -157,7 +165,7 @@ export class Vaults {
 			throw new Error('Signer not provided');
 		}
 
-		return tryCall(this.smartContractAdapter.yelayLiteVault.deposit(signer, vault, pool, amount, overrides));
+		return tryCall(this.yelayLiteVault.deposit(signer, vault, pool, amount, overrides));
 	}
 
 	/**
@@ -176,9 +184,7 @@ export class Vaults {
 		swapData: SwapArgsStruct,
 		callOverrides?: CallOverrides,
 	): Promise<ContractTransaction> {
-		return tryCall(
-			this.smartContractAdapter.vaultWrapper.swapAndDeposit(vault, pool, swapData, amount, callOverrides),
-		);
+		return tryCall(this.vaultWrapper.swapAndDeposit(vault, pool, swapData, amount, callOverrides));
 	}
 
 	/**
@@ -199,7 +205,7 @@ export class Vaults {
 		if (!signer) {
 			throw new Error('Signer not provided');
 		}
-		return tryCall(this.smartContractAdapter.yelayLiteVault.redeem(signer, vault, pool, amount, overrides));
+		return tryCall(this.yelayLiteVault.redeem(signer, vault, pool, amount, overrides));
 	}
 
 	/**
@@ -210,7 +216,7 @@ export class Vaults {
 	 * @returns {Promise<ContractTransaction>} A promise that resolves to the result of the activation transaction.
 	 */
 	async activatePool(vault: string, pool: number, overrides?: Overrides): Promise<ContractTransaction> {
-		return tryCall(this.smartContractAdapter.yelayLiteVault.activatePool(vault, pool, overrides));
+		return tryCall(this.yelayLiteVault.activatePool(vault, pool, overrides));
 	}
 
 	/**
@@ -229,6 +235,6 @@ export class Vaults {
 		amount: BigNumberish,
 		overrides?: Overrides,
 	): Promise<ContractTransaction> {
-		return this.smartContractAdapter.yelayLiteVault.migrate(vault, fromPool, toPool, amount, overrides);
+		return this.yelayLiteVault.migrate(vault, fromPool, toPool, amount, overrides);
 	}
 }

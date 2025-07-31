@@ -1,14 +1,13 @@
-import { SmartContractAdapter } from '../../adapters/smartContract';
-import { IContractFactory } from '../ports/IContractFactory';
+import { IYelayLiteVault } from '../ports/smartContract/IYelayLiteVault';
 import { Protocol, Strategy } from '../../types/strategies';
 import { StrategiesBackend } from '../../adapters/backend/StrategiesBackend';
 
 export class Strategies {
-	private smartContractAdapter: SmartContractAdapter;
+	private yelayLiteVault: IYelayLiteVault;
 	private strategiesBackend: StrategiesBackend;
 
-	constructor(contractFactory: IContractFactory, backendUrl: string) {
-		this.smartContractAdapter = new SmartContractAdapter(contractFactory);
+	constructor(yelayLiteVault: IYelayLiteVault, backendUrl: string) {
+		this.yelayLiteVault = yelayLiteVault;
 		this.strategiesBackend = new StrategiesBackend(backendUrl);
 	}
 
@@ -30,8 +29,8 @@ export class Strategies {
 	 */
 	async getActiveStrategies(vault: string): Promise<Strategy[]> {
 		const protocols = await this.strategiesBackend.getProtocols();
-		const totalAssets = await this.smartContractAdapter.yelayLiteVault.totalAssets(vault);
-		const activeStrategies = await this.smartContractAdapter.yelayLiteVault.activeStrategies(vault);
+		const totalAssets = await this.yelayLiteVault.totalAssets(vault);
+		const activeStrategies = await this.yelayLiteVault.activeStrategies(vault);
 		const result = await Promise.all(
 			activeStrategies.map(async (strategy, index) => {
 				const prefix = strategy.name.split('-')[0];
@@ -39,7 +38,7 @@ export class Strategies {
 				if (!protocol) {
 					throw new Error(`Protocol for ${prefix} not found`);
 				}
-				const strategyAssets = await this.smartContractAdapter.yelayLiteVault.strategyAssets(vault, index);
+				const strategyAssets = await this.yelayLiteVault.strategyAssets(vault, index);
 				const allocation = strategyAssets.mul(10000).div(totalAssets).toNumber() / 100;
 				return {
 					...strategy,

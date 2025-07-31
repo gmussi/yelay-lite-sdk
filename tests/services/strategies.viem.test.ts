@@ -6,30 +6,27 @@ import { YelayLiteSdk } from '../../src';
 dotenv.config();
 
 describe('Strategies (Viem)', () => {
-	let sdk: YelayLiteSdk;
+	let sdk: YelayLiteSdk<'viem'>;
 
 	beforeAll(() => {
 		const client = createPublicClient({
 			chain: base,
-			transport: http('https://base.llamarpc.com'),
+			transport: http('https://base.meowrpc.com'),
 		});
 
-		sdk = new YelayLiteSdk(client, 8453, 'viem', true);
+		sdk = new YelayLiteSdk('viem', client as any, 8453, true);
 	});
 
 	it('get protocols', async () => {
 		const protocols = await sdk.strategies.getProtocols();
 
-		console.log('[VIEM] protocols count:', protocols.length);
-		expect(Array.isArray(protocols)).toBe(true);
-		if (protocols.length > 0) {
-			expect(protocols[0]).toHaveProperty('id');
-		}
+		console.log('[VIEM] protocols', protocols.length);
+		expect(protocols.length).toBeGreaterThan(0);
 	});
 
-	it.skip('active strategies', async () => {
+	it('get active strategies', async () => {
 		const activeStrategies = await sdk.strategies.getActiveStrategies('0x7b3D25c37c6ADf650F1f7696be2278cCFa2b638F');
 
-		console.log('[VIEM]', activeStrategies);
+		console.log('[VIEM] active strategies', activeStrategies);
 	});
 });

@@ -1,35 +1,22 @@
+import dotenv from 'dotenv';
 import { JsonRpcProvider } from 'ethers-v6';
 import { YelayLiteSdk } from '../../src';
 
+dotenv.config();
+
 describe('Yield (Ethers v6)', () => {
-	let sdk: YelayLiteSdk;
+	let sdk: YelayLiteSdk<'ethers6'>;
 
 	beforeAll(() => {
-		const provider = new JsonRpcProvider('https://base.llamarpc.com');
+		const provider = new JsonRpcProvider('https://base.meowrpc.com');
 
-		sdk = new YelayLiteSdk(provider, 8453, 'ethers6', true);
+		sdk = new YelayLiteSdk('ethers6', provider, 8453, true);
 	});
 
-	it.skip('Get Yields', async () => {
-		const vaultsYield = await sdk.yields.getVaultsYield(['0x16db68c86edfdb60ba733563326ed392b319eb2b'], {
-			fromBlock: 1,
-			toBlock: 26539965,
-		});
+	it('get vaults yield', async () => {
+		const vaultsYield = await sdk.yields.getVaultsYield();
 
-		console.log('[ETHERS6] vaultsYield', vaultsYield);
+		console.log('[ETHERS6] vaultsYield', vaultsYield.length);
+		expect(vaultsYield.length).toBeGreaterThan(0);
 	});
-
-	it.skip('Get Yields', async () => {
-		const yields = await sdk.yields.getYields();
-
-		console.log('[ETHERS6] userYield', yields);
-	});
-
-	it('Get Claimable Yield', async () => {
-		const claimableYield = await sdk.yields.getClaimableYield({
-			user: '0x1892e547F4E1bA76F82a09C16C9F774744De1ff3',
-		});
-
-		console.log('[ETHERS6] claimableYield for user 0x1892e547F4E1bA76F82a09C16C9F774744De1ff3', claimableYield);
-	}, 15000);
 });

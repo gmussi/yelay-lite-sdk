@@ -1,15 +1,14 @@
-import { SmartContractAdapter } from '../../adapters/smartContract';
 import { PoolsBackend } from '../../adapters/backend/PoolsBackend';
-import { IContractFactory } from '../ports/IContractFactory';
+import { IYelayLiteVault } from '../ports/smartContract/IYelayLiteVault';
 import { PaginatedResponse } from '../../types/backend';
 import { PoolsTvl, HistoricalTVL, HistoricalTVLParams } from '../../types/pools';
 
 export class Pools {
-	private smartContractAdapter: SmartContractAdapter;
+	private yelayLiteVault: IYelayLiteVault;
 	private poolsBackend: PoolsBackend;
 
-	constructor(contractFactory: IContractFactory, backendUrl: string, chainId: number) {
-		this.smartContractAdapter = new SmartContractAdapter(contractFactory);
+	constructor(yelayLiteVault: IYelayLiteVault, backendUrl: string, chainId: number) {
+		this.yelayLiteVault = yelayLiteVault;
 		this.poolsBackend = new PoolsBackend(backendUrl, chainId);
 	}
 
@@ -20,10 +19,9 @@ export class Pools {
 	 * @returns {Promise<PoolsTvl[]>} A promise that resolves to an array of TVL values for each pool.
 	 */
 	async getPoolsTvl(vault: string, pools: number[]): Promise<PoolsTvl[]> {
-		const { totalAssets, totalSupply, poolsSupply } =
-			await this.smartContractAdapter.yelayLiteVault.getPoolsSupplies(vault, pools);
+		const { totalAssets, totalSupply, poolsSupply } = await this.yelayLiteVault.getPoolsSupplies(vault, pools);
 
-		return poolsSupply.map((poolSupply, index) => ({
+		return poolsSupply.map((poolSupply: any, index: number) => ({
 			id: pools[index],
 			tvl: totalAssets.mul(poolSupply).div(totalSupply),
 		}));

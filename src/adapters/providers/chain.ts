@@ -1,42 +1,98 @@
 /**
- * Dynamic chain adapter that switches implementation at runtime.
- * The adapter type is set by the YelayLiteSdk constructor.
+ * Type-safe chain adapter factory that supports multiple web3 frameworks.
+ * Usage: import { createChainAdapter } from './chain';
+ * const adapter = createChainAdapter('ethers5');
  */
 
-// Global variable to store the selected adapter type
-let selectedAdapter: 'ethers5' | 'ethers6' | 'viem' = 'ethers5';
+// Framework-specific type definitions
+export type Framework = 'ethers5' | 'ethers6' | 'viem';
 
-// Function to set the adapter type (called from YelayLiteSdk constructor)
-export function setChainAdapter(adapterType: 'ethers5' | 'ethers6' | 'viem') {
-	selectedAdapter = adapterType;
+// Conditional types based on framework
+export type BigNumberType<T extends Framework> = T extends 'ethers5'
+	? import('ethers').BigNumber
+	: T extends 'ethers6'
+	? bigint
+	: T extends 'viem'
+	? bigint
+	: never;
+
+export type SignerType<T extends Framework> = T extends 'ethers5'
+	? import('ethers').Signer
+	: T extends 'ethers6'
+	? import('ethers-v6').Signer
+	: T extends 'viem'
+	? import('viem').WalletClient
+	: never;
+
+export type ProviderType<T extends Framework> = T extends 'ethers5'
+	? import('@ethersproject/providers').Provider
+	: T extends 'ethers6'
+	? import('ethers-v6').Provider
+	: T extends 'viem'
+	? import('viem').PublicClient
+	: never;
+
+// Common types that work across all frameworks
+export type BigNumberish = bigint | string | number;
+export type ContractTransaction = any; // Could be made framework-specific if needed
+export type Overrides = any; // Could be made framework-specific if needed
+export type PayableOverrides = any; // Could be made framework-specific if needed
+export type CallOverrides = any; // Could be made framework-specific if needed
+
+// Define the adapter interface that all frameworks must implement
+export interface ChainAdapter<T extends Framework = Framework> {
+	BigNumber: {
+		from: (value: BigNumberish) => BigNumberType<T>;
+		isBigNumber: (value: unknown) => value is BigNumberType<T>;
+	};
+	Signer: {
+		isSigner: (obj: unknown) => obj is SignerType<T>;
+	};
+	ethersUtils: Record<string, unknown>;
 }
 
-// Dynamic re-exports based on selected adapter
-function getAdapterExports() {
-	switch (selectedAdapter) {
+// Factory function that returns the appropriate adapter based on framework
+export function createChainAdapter<T extends Framework>(framework: T): ChainAdapter<T> {
+	switch (framework) {
+		case 'ethers5':
+			return require('./chain-ethers5') as ChainAdapter<T>;
 		case 'ethers6':
-			return require('./chain-ethers6');
+			return require('./chain-ethers6') as ChainAdapter<T>;
 		case 'viem':
-			return require('./chain-viem');
+			return require('./chain-viem') as ChainAdapter<T>;
 		default:
-			return require('./chain-ethers5');
+			throw new Error(`Unsupported framework: ${framework}`);
 	}
 }
 
-// Re-export everything from the selected adapter
-const adapterExports = getAdapterExports();
+// Type-safe factory that returns properly typed exports
+export function createTypedChainAdapter<T extends Framework>(framework: T) {
+	const adapter = createChainAdapter(framework);
 
-// Export types
-export type BigNumber = any;
-export type BigNumberish = any;
-export type ContractTransaction = any;
-export type Overrides = any;
-export type PayableOverrides = any;
-export type CallOverrides = any;
-export type Signer = any;
-export type Provider = any;
+	return {
+		// Re-export the adapter with proper typing
+		adapter,
 
-// Export utilities and values
-export const ethersUtils = adapterExports.ethersUtils;
-export const Signer = adapterExports.Signer;
-export const BigNumber = adapterExports.BigNumber;
+		// Export types based on framework
+		BigNumber: adapter.BigNumber,
+		Signer: adapter.Signer,
+		ethersUtils: adapter.ethersUtils,
+
+		// Framework-specific type exports with proper typing
+		BigNumberType: adapter.BigNumber as ChainAdapter<T>['BigNumber'],
+		SignerType: adapter.Signer as ChainAdapter<T>['Signer'],
+	};
+}
+
+// Legacy compatibility - exports the default adapter (ethers5)
+// This maintains backward compatibility while encouraging the new pattern
+const defaultAdapter = createChainAdapter('ethers5');
+
+export const ethersUtils = defaultAdapter.ethersUtils;
+export const Signer = defaultAdapter.Signer;
+export const BigNumber = defaultAdapter.BigNumber;
+
+// Export types for backward compatibility (using ethers5 as default)
+export type BigNumber = BigNumberType<'ethers5'>;
+export type Signer = SignerType<'ethers5'>;
+export type Provider = ProviderType<'ethers5'>;

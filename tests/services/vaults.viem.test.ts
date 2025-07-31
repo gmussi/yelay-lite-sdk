@@ -7,7 +7,7 @@ dotenv.config();
 jest.setTimeout(200000);
 
 describe('Vaults (Viem)', () => {
-	let sdk: YelayLiteSdk;
+	let sdk: YelayLiteSdk<'viem'>;
 
 	beforeAll(() => {
 		const client = createPublicClient({
@@ -15,7 +15,7 @@ describe('Vaults (Viem)', () => {
 			transport: http('https://base.meowrpc.com'),
 		});
 
-		sdk = new YelayLiteSdk(client, 8453, 'viem', true);
+		sdk = new YelayLiteSdk('viem', client as any, 8453, true);
 	});
 
 	it('getVaults', async () => {

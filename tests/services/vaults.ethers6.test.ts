@@ -6,12 +6,12 @@ dotenv.config();
 jest.setTimeout(200000);
 
 describe('Vaults (Ethers v6)', () => {
-	let sdk: YelayLiteSdk;
+	let sdk: YelayLiteSdk<'ethers6'>;
 
 	beforeAll(() => {
 		const provider = new JsonRpcProvider('https://base.meowrpc.com');
 
-		sdk = new YelayLiteSdk(provider, 8453, 'ethers6', true);
+		sdk = new YelayLiteSdk('ethers6', provider, 8453, true);
 	});
 
 	it('getVaults', async () => {

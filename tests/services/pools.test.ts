@@ -5,12 +5,12 @@ import { YelayLiteSdk } from '../../src';
 dotenv.config();
 
 describe('Pools', () => {
-	let sdk: YelayLiteSdk;
+	let sdk: YelayLiteSdk<'ethers5'>;
 
 	beforeAll(() => {
 		const provider = new ethers.providers.JsonRpcProvider('https://base.llamarpc.com');
 
-		sdk = new YelayLiteSdk(provider, 8453, 'ethers5', true);
+		sdk = new YelayLiteSdk('ethers5', provider, 8453, true);
 	});
 
 	it('get projectsTVL', async () => {

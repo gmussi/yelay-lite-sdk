@@ -6,7 +6,7 @@ import { YelayLiteSdk } from '../../src';
 dotenv.config();
 
 describe('Pools (Viem)', () => {
-	let sdk: YelayLiteSdk;
+	let sdk: YelayLiteSdk<'viem'>;
 
 	beforeAll(() => {
 		const client = createPublicClient({
@@ -14,7 +14,7 @@ describe('Pools (Viem)', () => {
 			transport: http('https://base.llamarpc.com'),
 		});
 
-		sdk = new YelayLiteSdk(client, 8453, 'viem', true);
+		sdk = new YelayLiteSdk('viem', client as any, 8453, true);
 	});
 
 	it('get projectsTVL', async () => {

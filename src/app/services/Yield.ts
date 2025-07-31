@@ -1,7 +1,6 @@
 import { BigNumber, ContractTransaction, Overrides } from '@chain';
 import { IProviderAdapter } from '../../adapters/providers/IProviderAdapter';
 import { YieldBackend } from '../../adapters/backend/YieldBackend';
-import { SmartContractAdapter } from '../../adapters/smartContract';
 import { TimeFrame } from '../../types/backend';
 import { ChainId } from '../../types/config';
 import {
@@ -16,16 +15,16 @@ import {
 import { getTimestampOneWeekAgo } from '../../utils/backend';
 import { tryCall } from '../../utils/smartContract';
 import { IYieldBackend } from '../ports/backend/IYieldBackend';
-import { IContractFactory } from '../ports/IContractFactory';
+import { IYieldExtractor } from '../ports/smartContract/IYieldExtractor';
 
 export class Yield {
-	private smartContractAdapter: SmartContractAdapter;
+	private yieldExtractor: IYieldExtractor;
 	private yieldBackend: IYieldBackend;
 	private adapter: IProviderAdapter;
 	private chainId: ChainId;
 
-	constructor(contractFactory: IContractFactory, backendUrl: string, chainId: ChainId, adapter: IProviderAdapter) {
-		this.smartContractAdapter = new SmartContractAdapter(contractFactory);
+	constructor(yieldExtractor: IYieldExtractor, backendUrl: string, chainId: ChainId, adapter: IProviderAdapter) {
+		this.yieldExtractor = yieldExtractor;
 		this.yieldBackend = new YieldBackend(backendUrl, chainId);
 		this.adapter = adapter;
 		this.chainId = chainId;
@@ -76,7 +75,7 @@ export class Yield {
 		const provider = this.adapter.getProvider();
 		const latestBlock = await provider.getBlockNumber();
 
-		const lastClaimEvent = await this.smartContractAdapter.yieldExtractor.getLastClaimEvent(
+		const lastClaimEvent = await this.yieldExtractor.getLastClaimEvent(
 			params.user,
 			params.vault.address,
 			params.poolId,
@@ -96,15 +95,13 @@ export class Yield {
 		const claimRequests = await this.yieldBackend.getClaimRequests(params);
 
 		const claimedShares = await Promise.all(
-			claimRequests.map(c =>
-				this.smartContractAdapter.yieldExtractor.getClaimedShares(params.user, c.yelayLiteVault, c.pool),
-			),
+			claimRequests.map(c => this.yieldExtractor.getClaimedShares(params.user, c.yelayLiteVault, c.pool)),
 		);
 
 		return claimRequests.map((c, i) => {
 			const totalShares = BigNumber.from(c.yieldSharesTotal);
-			const claimedSharesAmount = BigNumber.from(claimedShares[i]);
-			const claimable = totalShares - claimedSharesAmount;
+			const claimedSharesAmount = BigNumber.from(claimedShares[i].toString());
+			const claimable = totalShares.sub(claimedSharesAmount);
 			return {
 				claimable: claimable.toString(),
 				claimed: claimedSharesAmount.toString(),
@@ -114,6 +111,6 @@ export class Yield {
 	}
 
 	async claimYield(claimRequests: ClaimRequest[], overrides?: Overrides): Promise<ContractTransaction> {
-		return tryCall(this.smartContractAdapter.yieldExtractor.claim(claimRequests, overrides));
+		return tryCall(this.yieldExtractor.claim(claimRequests, overrides));
 	}
 }
