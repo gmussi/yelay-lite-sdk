@@ -5,6 +5,19 @@
  */
 
 // Framework-specific type definitions
+// Type aliases for each framework’s utils module
+type Ethers5Utils = typeof import('ethers/lib/utils');
+type Ethers6Utils = typeof import('./chain-ethers6').ethersUtils;
+type ViemUtils = typeof import('./chain-viem').ethersUtils;
+// Conditional mapping for the adapter’s utils
+type UtilsType<T extends Framework> = T extends 'ethers5'
+	? Ethers5Utils
+	: T extends 'ethers6'
+	? Ethers6Utils
+	: T extends 'viem'
+	? ViemUtils
+	: never;
+
 export type Framework = 'ethers5' | 'ethers6' | 'viem';
 
 // Conditional types based on framework
@@ -48,7 +61,7 @@ export interface ChainAdapter<T extends Framework = Framework> {
 	Signer: {
 		isSigner: (obj: unknown) => obj is SignerType<T>;
 	};
-	ethersUtils: Record<string, unknown>;
+	ethersUtils: UtilsType<T>;
 }
 
 // Factory function that returns the appropriate adapter based on framework
@@ -96,3 +109,11 @@ export const BigNumber = defaultAdapter.BigNumber;
 export type BigNumber = BigNumberType<'ethers5'>;
 export type Signer = SignerType<'ethers5'>;
 export type Provider = ProviderType<'ethers5'>;
+
+// Export adapters for each framework
+export const ethers5 = createChainAdapter('ethers5');
+export const ethers6 = createChainAdapter('ethers6');
+export const viem = createChainAdapter('viem');
+
+// Default export for backward compatibility
+export default defaultAdapter;
