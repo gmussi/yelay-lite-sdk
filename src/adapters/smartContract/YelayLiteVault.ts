@@ -1,4 +1,4 @@
-import { BigNumber, ContractTransaction, Overrides, Signer, BigNumberish, ethersUtils } from '@chain';
+import { BigNumber, ContractTransaction, Overrides, Signer, BigNumberish, ethersUtils } from '../providers/chain';
 import { IContractFactory } from '../../app/ports/IContractFactory';
 import { IYelayLiteVault, PoolsSupply } from '../../app/ports/smartContract/IYelayLiteVault';
 import { ClientData, StrategyData } from '../../types/smartContract';

@@ -1,5 +1,5 @@
 import { IProviderAdapter } from '../../adapters/providers/IProviderAdapter';
-import { BigNumber, CallOverrides, ContractTransaction, Overrides, BigNumberish } from '@chain';
+import { BigNumber, CallOverrides, ContractTransaction, Overrides, BigNumberish } from '../../adapters/providers/chain';
 import { VaultsBackend } from '../../adapters/backend/VaultsBackend';
 import { ClientData } from '../../types/smartContract';
 import { Vault } from '../../types/vaults';
