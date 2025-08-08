@@ -53,14 +53,37 @@ export class YelayLiteVault implements IYelayLiteVault {
 		overrides: Overrides = {},
 	): Promise<ContractTransaction> {
 		const userAddress = await signer.getAddress();
+		const contract = this.contractFactory.getYelayLiteVault(vault);
+		const normalizedAmount = typeof amount === 'bigint' ? amount.toString() : amount;
 
-		await populateGasLimit(
-			this.contractFactory.getYelayLiteVault(vault).estimateGas.deposit,
-			[amount, pool, userAddress],
+		// Estimate gas for the deposit transaction (fills overrides.gasLimit if missing)
+		await populateGasLimit(contract.estimateGas.deposit, [normalizedAmount, pool, userAddress], overrides);
+
+		// Populate the transaction using the v5 contract to ensure proper encoding
+		const populated = await (contract as any).populateTransaction.deposit(
+			normalizedAmount,
+			pool,
+			userAddress,
 			overrides,
 		);
 
-		return this.contractFactory.getYelayLiteVault(vault).deposit(amount, pool, userAddress, overrides);
+		// Build the transaction request for the v6 signer
+		const txRequest: any = {
+			to: populated.to ?? contract.address,
+			data:
+				populated.data ??
+				(contract as any).interface.encodeFunctionData('deposit', [normalizedAmount, pool, userAddress]),
+		};
+		// Attach gasLimit override if present (convert to bigint)
+		if (overrides.gasLimit) {
+			txRequest.gasLimit = BigInt(overrides.gasLimit.toString());
+		}
+		// Attach value override if present (convert to bigint)
+		if ((overrides as any).value) {
+			txRequest.value = BigInt((overrides as any).value.toString());
+		}
+		// Send the transaction using the v6 signer
+		return signer.sendTransaction(txRequest);
 	}
 
 	async redeem(
@@ -71,14 +94,31 @@ export class YelayLiteVault implements IYelayLiteVault {
 		overrides: Overrides = {},
 	): Promise<ContractTransaction> {
 		const userAddress = await signer.getAddress();
+		const contract = this.contractFactory.getYelayLiteVault(vault);
+		const normalizedAmount = typeof amount === 'bigint' ? amount.toString() : amount;
 
-		await populateGasLimit(
-			this.contractFactory.getYelayLiteVault(vault).estimateGas.redeem,
-			[amount, pool, userAddress],
+		await populateGasLimit(contract.estimateGas.redeem, [normalizedAmount, pool, userAddress], overrides);
+
+		const populated = await (contract as any).populateTransaction.redeem(
+			normalizedAmount,
+			pool,
+			userAddress,
 			overrides,
 		);
 
-		return this.contractFactory.getYelayLiteVault(vault).redeem(amount, pool, userAddress, overrides);
+		const txRequest: any = {
+			to: populated.to ?? (contract as any).address,
+			data:
+				populated.data ??
+				(contract as any).interface.encodeFunctionData('redeem', [normalizedAmount, pool, userAddress]),
+		};
+		if (overrides.gasLimit) {
+			txRequest.gasLimit = BigInt(overrides.gasLimit.toString());
+		}
+		if ((overrides as any).value) {
+			txRequest.value = BigInt((overrides as any).value.toString());
+		}
+		return signer.sendTransaction(txRequest);
 	}
 
 	async migrate(

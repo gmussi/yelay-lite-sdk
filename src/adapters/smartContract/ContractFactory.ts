@@ -37,8 +37,15 @@ export class ContractFactory<T extends Framework = Framework> implements IContra
 	 * Universal contract connection that works with all adapter types
 	 */
 	private connectContract<ContractType>(address: string, factory: any): ContractType {
-		// For all adapter types, use the ethers5 factory pattern
-		// The adapter layer ensures the signerOrProvider is compatible
+		// Attempt to connect with signer; if that fails or no signer, fallback to provider
+		if (typeof this.providerAdapter.getSigner === 'function') {
+			try {
+				const signer = this.providerAdapter.getSigner();
+				return factory.connect(address, signer) as ContractType;
+			} catch {
+				// invalid signer for v5 contract, ignore and fallback
+			}
+		}
 		return factory.connect(address, this.provider as any) as ContractType;
 	}
 
@@ -55,7 +62,6 @@ export class ContractFactory<T extends Framework = Framework> implements IContra
 	}
 
 	getYieldExtractor(multicall = false): YieldExtractor {
-		const providerToUse = multicall ? this.provider : this.provider;
-		return YieldExtractor__factory.connect(this.contractAddresses.YieldExtractor, providerToUse as any);
+		return this.connectContract<YieldExtractor>(this.contractAddresses.YieldExtractor, YieldExtractor__factory);
 	}
 }
