@@ -1,6 +1,5 @@
 import dotenv from 'dotenv';
 import { ethers } from 'ethers';
-import { parseEther } from 'ethers/lib/utils';
 import { YelayLiteSdk } from '../../src';
 
 dotenv.config();
@@ -10,7 +9,7 @@ describe('Vaults', () => {
 	let sdk: YelayLiteSdk;
 
 	beforeAll(() => {
-		const provider = new ethers.providers.JsonRpcProvider('https://base.meowrpc.com');
+		const provider = new ethers.JsonRpcProvider('https://base.meowrpc.com');
 
 		sdk = new YelayLiteSdk(provider, 'base-testing');
 	});

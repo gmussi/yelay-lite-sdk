@@ -8,7 +8,7 @@ describe('Strategies', () => {
 	let sdk: YelayLiteSdk;
 
 	beforeAll(() => {
-		const provider = new ethers.providers.JsonRpcProvider('https://base.llamarpc.com');
+		const provider = new ethers.JsonRpcProvider('https://base.llamarpc.com');
 
 		sdk = new YelayLiteSdk(provider, 8453, true);
 	});
