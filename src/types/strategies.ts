@@ -15,5 +15,5 @@ export type Protocol = Omit<ProtocolData, 'prefixes'>;
 export type Strategy = {
 	name: string;
 	protocolId: string;
-	allocation: number;
+	allocation: bigint;
 };

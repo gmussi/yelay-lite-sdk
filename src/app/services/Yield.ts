@@ -1,5 +1,4 @@
-import { Provider } from '@ethersproject/providers';
-import { BigNumber, ContractTransaction, Overrides, Signer } from 'ethers';
+import { BrowserProvider, ContractTransactionResponse, ethers, Overrides } from 'ethers';
 import { YieldBackend } from '../../adapters/backend/YieldBackend';
 import { SmartContractAdapter } from '../../adapters/smartContract';
 import { TimeFrame } from '../../types/backend';
@@ -21,19 +20,17 @@ import { IContractFactory } from '../ports/IContractFactory';
 export class Yield {
 	private smartContractAdapter: SmartContractAdapter;
 	private yieldBackend: IYieldBackend;
-	private signerOrProvider: Signer | Provider;
-	private chainId: ChainId;
+	private browserProvider: BrowserProvider;
 
 	constructor(
 		contractFactory: IContractFactory,
 		backendUrl: string,
 		chainId: ChainId,
-		signerOrProvider: Signer | Provider,
+		_browserProvider: BrowserProvider,
 	) {
 		this.smartContractAdapter = new SmartContractAdapter(contractFactory);
 		this.yieldBackend = new YieldBackend(backendUrl, chainId);
-		this.signerOrProvider = signerOrProvider;
-		this.chainId = chainId;
+		this.browserProvider = _browserProvider;
 	}
 
 	/**
@@ -79,11 +76,13 @@ export class Yield {
 
 	async getLastClaimEvent(params: GetLastClaimEventParams) {
 		let latestBlock = 0;
-		if (Signer.isSigner(this.signerOrProvider)) {
-			latestBlock = await this.signerOrProvider.provider!.getBlockNumber();
-		} else {
-			latestBlock = await this.signerOrProvider.getBlockNumber();
-		}
+
+		latestBlock = await this.browserProvider.provider!.getBlockNumber();
+		// if (Signer.isSigner(this.signerOrProvider)) {
+		// 	latestBlock = await this.signerOrProvider.provider!.getBlockNumber();
+		// } else {
+		// 	latestBlock = await this.signerOrProvider.getBlockNumber();
+		// }
 
 		const lastClaimEvent = await this.smartContractAdapter.yieldExtractor.getLastClaimEvent(
 			params.user,
@@ -111,7 +110,7 @@ export class Yield {
 		);
 
 		return claimRequests.map((c, i) => {
-			const claimable = BigNumber.from(c.yieldSharesTotal).sub(claimedShares[i]);
+			const claimable = ethers.getBigInt(c.yieldSharesTotal) - claimedShares[i];
 			return {
 				claimable: claimable.toString(),
 				claimed: claimedShares[i].toString(),
@@ -120,7 +119,7 @@ export class Yield {
 		});
 	}
 
-	async claimYield(claimRequests: ClaimRequest[], overrides?: Overrides): Promise<ContractTransaction> {
+	async claimYield(claimRequests: ClaimRequest[], overrides?: Overrides): Promise<ContractTransactionResponse> {
 		return tryCall(this.smartContractAdapter.yieldExtractor.claim(claimRequests, overrides));
 	}
 }

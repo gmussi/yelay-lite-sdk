@@ -16,7 +16,7 @@
 		"build"
 	],
 	"scripts": {
-		"gen-types": "typechain --target=ethers-v5 --out-dir=src/generated/typechain src/abis/*.json",
+		"gen-types": "typechain --target=ethers-v6 --out-dir=src/generated/typechain src/abis/*.json",
 		"build": "pnpm run gen-types && rimraf ./build && tsc",
 		"test": "jest --config jest.config.ts"
 	},
@@ -31,12 +31,12 @@
 	"dependencies": {
 		"@ethersproject/abi": "5.8.0",
 		"@ethersproject/providers": "5.8.0",
-		"ethers": "5.7.2",
+		"ethers": "6.15.0",
 		"ethers-multicall-provider": "3.1.2",
 		"rimraf": "6.0.1"
 	},
 	"devDependencies": {
-		"@typechain/ethers-v5": "11.1.2",
+		"@typechain/ethers-v6": "0.5.1",
 		"@types/jest": "29.5.14",
 		"@types/lodash": "4.17.16",
 		"@types/node": "22.13.4",

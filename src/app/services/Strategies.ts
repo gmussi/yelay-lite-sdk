@@ -40,7 +40,7 @@ export class Strategies {
 					throw new Error(`Protocol for ${prefix} not found`);
 				}
 				const strategyAssets = await this.smartContractAdapter.yelayLiteVault.strategyAssets(vault, index);
-				const allocation = strategyAssets.mul(10000).div(totalAssets).toNumber() / 100;
+				const allocation = ((strategyAssets * 10000n) / totalAssets) / 100n;
 				return {
 					...strategy,
 					protocolId: protocol.id,

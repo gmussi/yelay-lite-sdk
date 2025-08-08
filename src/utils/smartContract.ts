@@ -1,8 +1,7 @@
-import { BigNumber, ContractTransaction, ethers, PayableOverrides } from 'ethers';
+import { ContractTransactionResponse, Overrides } from 'ethers';
 import { LibErrors__factory } from '../generated/typechain';
-import { ChainId } from '../types/config';
 
-export const tryCall = async (call: Promise<ethers.ContractTransaction>): Promise<ContractTransaction> => {
+export const tryCall = async (call: Promise<ContractTransactionResponse>): Promise<ContractTransactionResponse> => {
 	try {
 		return call;
 	} catch (error: any) {
@@ -16,16 +15,16 @@ export const tryCall = async (call: Promise<ethers.ContractTransaction>): Promis
 	}
 };
 
-export const getIncreasedGasLimit = (gasLimit: BigNumber) => {
-	const increasedGasLimit = gasLimit.mul(120).div(100);
+export const getIncreasedGasLimit = (gasLimit: bigint) => {
+	const increasedGasLimit = (gasLimit * 120n)/ 100n;
 	return increasedGasLimit;
 };
 
 // optionally populate gasLimit via estimateGas
-export async function populateGasLimit<T extends (...args: any[]) => Promise<BigNumber>>(
+export async function populateGasLimit<T extends (...args: any[]) => Promise<bigint>>(
 	fn: T,
 	args: Parameters<T>,
-	overrides: PayableOverrides,
+	overrides: Overrides,
 ) {
 	try {
 		if (!overrides.gasLimit) {
