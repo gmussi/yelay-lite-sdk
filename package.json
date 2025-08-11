@@ -31,14 +31,14 @@
 	"dependencies": {
 		"@ethersproject/abi": "5.8.0",
 		"@ethersproject/providers": "5.8.0",
-		"ethers": "5.7.2",
 		"ethers-multicall-provider": "3.1.2",
+		"ethers-v5": "npm:ethers@5.7.2",
 		"ethers-v6": "npm:ethers@^6.15.0",
 		"rimraf": "6.0.1",
 		"viem": "^2.33.0"
 	},
 	"devDependencies": {
-		"@typechain/ethers-v5": "11.1.2",
+		"@typechain/ethers-v6": "0.5.1",
 		"@types/jest": "29.5.14",
 		"@types/lodash": "4.17.16",
 		"@types/node": "22.13.4",
