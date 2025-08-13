@@ -1,7 +1,9 @@
-import { ContractTransactionResponse, Overrides } from 'ethers';
-import { LibErrors__factory } from '../generated/typechain';
+import { ContractTransactionResponse } from 'ethers-v6';
+import { Overrides } from 'ethers-v5';
+import { LibErrors__factory } from '../generated/typechain-v6';
+import { ContractTransaction } from 'ethers-v5';
 
-export const tryCall = async (call: Promise<ContractTransactionResponse>): Promise<ContractTransactionResponse> => {
+export const tryCall = async (call: Promise<ContractTransaction | ContractTransactionResponse>): Promise<ContractTransaction | ContractTransactionResponse> => {
 	try {
 		return call;
 	} catch (error: any) {

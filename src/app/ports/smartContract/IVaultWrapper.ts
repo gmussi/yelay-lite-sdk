@@ -1,24 +1,25 @@
-import { ContractTransactionResponse, ethers, Overrides, Signer } from 'ethers';
-import { SwapArgsStruct } from '../../../generated/typechain/VaultWrapper';
+import { ContractTransactionResponse } from 'ethers-v6';
+import { BigNumberish, ContractTransaction, Signer, Overrides} from 'ethers-v5';
+import { SwapArgsStruct } from '../../../generated/typechain-v6/VaultWrapper';
 
 export interface IVaultWrapper {
 	depositEth(
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigNumberish,
 		overrides?: any,
-	): Promise<ContractTransactionResponse>;
+	): Promise<ContractTransaction | ContractTransactionResponse>;
 	vaultWrapperAllowance(signer: Signer, tokenAddress: string): Promise<bigint>;
 	approveVaultWrapper(
 		tokenAddress: string,
-		amount: ethers.BigNumberish,
+		amount: BigNumberish,
 		overrides?: Overrides,
-	): Promise<ContractTransactionResponse>;
+	): Promise<ContractTransaction | ContractTransactionResponse>;
 	swapAndDeposit(
 		vault: string,
 		pool: number,
 		swapData: SwapArgsStruct,
-		amount: ethers.BigNumberish,
+		amount: BigNumberish,
 		overrides?: any,
-	): Promise<ContractTransactionResponse>;
+	): Promise<ContractTransaction | ContractTransactionResponse>;
 }

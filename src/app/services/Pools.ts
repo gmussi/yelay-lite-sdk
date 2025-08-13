@@ -1,15 +1,18 @@
 import { SmartContractAdapter } from '../../adapters/smartContract';
 import { PoolsBackend } from '../../adapters/backend/PoolsBackend';
-import { IContractFactory } from '../ports/IContractFactory';
 import { PaginatedResponse } from '../../types/backend';
 import { PoolsTvl, HistoricalTVL, HistoricalTVLParams } from '../../types/pools';
+import { BrowserProvider, JsonRpcSigner } from 'ethers-v6';
+import { Signer } from 'ethers-v5';
+import { Provider } from '@ethersproject/providers';
+import { ContractAddresses } from '../../types/config';
 
 export class Pools {
 	private smartContractAdapter: SmartContractAdapter;
 	private poolsBackend: PoolsBackend;
 
-	constructor(contractFactory: IContractFactory, backendUrl: string, chainId: number) {
-		this.smartContractAdapter = new SmartContractAdapter(contractFactory);
+	constructor(backendUrl: string, chainId: number, provider: BrowserProvider | JsonRpcSigner | Signer | Provider, config: ContractAddresses) {
+		this.smartContractAdapter = new SmartContractAdapter(provider, config);
 		this.poolsBackend = new PoolsBackend(backendUrl, chainId);
 	}
 

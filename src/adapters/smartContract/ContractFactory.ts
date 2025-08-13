@@ -1,50 +1,38 @@
-import { BrowserProvider } from 'ethers';
+import { BrowserProvider, JsonRpcSigner } from 'ethers-v6';
+import { Signer } from 'ethers-v5';
+import { Provider } from '@ethersproject/providers';
 import { IContractFactory } from '../../app/ports/IContractFactory';
-import {
-	ERC20,
-	ERC20__factory,
-	IYelayLiteVault,
-	IYelayLiteVault__factory,
-	VaultWrapper,
-	VaultWrapper__factory,
-	YieldExtractor,
-	YieldExtractor__factory,
-} from '../../generated/typechain';
 import { ContractAddresses } from '../../types/config';
+import AdapterYelayLiteVault from '../VersionAdapters/AdaptetYelayLiteVault/AdapterYelayLiteVault';
+import IAdapterVaultWrapper from '../VersionAdapters/AdapterVaultWrapper/IAdapterVaultWrapper';
+import AdapterVaultWrapper from '../VersionAdapters/AdapterVaultWrapper/AdapterVaultWrapper';
+import IAdapterErc20 from '../VersionAdapters/AdapterErc20/IAdapterErc20';
+import AdapterErc20 from '../VersionAdapters/AdapterErc20/AdapterErc20';
+import AdapterYieldExtractor from '../VersionAdapters/AdapterYieldExtractor/AdapterYieldExtractor';
+import IAdapterYieldExtractor from '../VersionAdapters/AdapterYieldExtractor/IAdapterYieldExtractor';
+import IAdapterYelayLiteVault from '../VersionAdapters/AdaptetYelayLiteVault/IAdapterYelayLiteVault';
 
 export class ContractFactory implements IContractFactory {
-	private browserProvider: BrowserProvider;
+	private browserProvider: BrowserProvider | JsonRpcSigner | Signer | Provider;
 
-	constructor(private _browserProvider: BrowserProvider, private contractAddresses: ContractAddresses) {
-		this.browserProvider = _browserProvider;
-		// if (isSigner(signerOrProvider)) {
-			
-		// 	if (signerOrProvider.provider) {
-		// 		this.provider = MulticallWrapper.wrap(signerOrProvider);
-		// 	} else {
-		// 		throw new Error('Signer has no provider');
-		// 	}
-		// } else {
-		// 	this.provider = MulticallWrapper.wrap(signerOrProvider);
-		// }
+	constructor(signerOrProvider: BrowserProvider | JsonRpcSigner | Signer | Provider, private contractAddresses: ContractAddresses) {
+		this.browserProvider = signerOrProvider
 	}
 
-	getYelayLiteVault(vault: string): IYelayLiteVault {
-		return IYelayLiteVault__factory.connect(vault, this.browserProvider);
+	getYelayLiteVault(vaultAddress: string): IAdapterYelayLiteVault {
+		return new AdapterYelayLiteVault(this.browserProvider, vaultAddress)
 	}
 
-	getVaultWrapper(): VaultWrapper {
-		return VaultWrapper__factory.connect(this.contractAddresses.VaultWrapper, this.browserProvider);
+	getVaultWrapper(): IAdapterVaultWrapper {
+		return new AdapterVaultWrapper(this.browserProvider, this.contractAddresses)
 	}
 
-	getErc20(address: string): ERC20 {
-		return ERC20__factory.connect(address, this.browserProvider);
+	getErc20(address: string): IAdapterErc20 {
+		return new AdapterErc20(this.browserProvider, address)
 	}
 
-	getYieldExtractor(multicall = false): YieldExtractor {
-		return YieldExtractor__factory.connect(
-			this.contractAddresses.YieldExtractor,
-			multicall ? this.browserProvider : this.browserProvider,
-		);
+	getYieldExtractor(multicall = false): IAdapterYieldExtractor {
+		return new AdapterYieldExtractor(this.browserProvider, this.contractAddresses.YieldExtractor)
 	}
 }
+

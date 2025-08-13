@@ -1,10 +1,11 @@
-import { BrowserProvider, ContractTransactionResponse, ethers, Overrides } from 'ethers';
+import { BrowserProvider, ethers, JsonRpcSigner } from 'ethers-v6';
+import { Signer } from 'ethers-v5';
+import { Provider } from '@ethersproject/providers';
 import { YieldBackend } from '../../adapters/backend/YieldBackend';
 import { SmartContractAdapter } from '../../adapters/smartContract';
 import { TimeFrame } from '../../types/backend';
-import { ChainId } from '../../types/config';
+import { ChainId, ContractAddresses } from '../../types/config';
 import {
-	ClaimRequest,
 	ClaimRequestParams,
 	ClaimableYield,
 	GetLastClaimEventParams,
@@ -13,22 +14,20 @@ import {
 	YieldAggregated,
 } from '../../types/yield';
 import { getTimestampOneWeekAgo } from '../../utils/backend';
-import { tryCall } from '../../utils/smartContract';
 import { IYieldBackend } from '../ports/backend/IYieldBackend';
-import { IContractFactory } from '../ports/IContractFactory';
 
 export class Yield {
 	private smartContractAdapter: SmartContractAdapter;
 	private yieldBackend: IYieldBackend;
-	private browserProvider: BrowserProvider;
+	private browserProvider: BrowserProvider | JsonRpcSigner | Signer | Provider;
 
 	constructor(
-		contractFactory: IContractFactory,
 		backendUrl: string,
 		chainId: ChainId,
-		_browserProvider: BrowserProvider,
+		_browserProvider: BrowserProvider | JsonRpcSigner | Signer | Provider,
+		config: ContractAddresses
 	) {
-		this.smartContractAdapter = new SmartContractAdapter(contractFactory);
+		this.smartContractAdapter = new SmartContractAdapter(_browserProvider, config);
 		this.yieldBackend = new YieldBackend(backendUrl, chainId);
 		this.browserProvider = _browserProvider;
 	}
@@ -77,12 +76,15 @@ export class Yield {
 	async getLastClaimEvent(params: GetLastClaimEventParams) {
 		let latestBlock = 0;
 
-		latestBlock = await this.browserProvider.provider!.getBlockNumber();
-		// if (Signer.isSigner(this.signerOrProvider)) {
-		// 	latestBlock = await this.signerOrProvider.provider!.getBlockNumber();
-		// } else {
-		// 	latestBlock = await this.signerOrProvider.getBlockNumber();
-		// }
+        if (this.browserProvider.constructor.name === 'BrowserProvider') {
+			latestBlock = await (this.browserProvider as BrowserProvider).getBlockNumber();
+		} else if (this.browserProvider.constructor.name === `Signer`) {
+			latestBlock = await (this.browserProvider as Signer).provider!.getBlockNumber();
+		} else if(this.browserProvider.constructor.name === `JsonRpcSigner`) {
+			latestBlock = await (this.browserProvider as JsonRpcSigner).provider!.getBlockNumber();
+		} else {
+			latestBlock = await (this.browserProvider as Provider).getBlockNumber();
+		}
 
 		const lastClaimEvent = await this.smartContractAdapter.yieldExtractor.getLastClaimEvent(
 			params.user,
@@ -119,7 +121,7 @@ export class Yield {
 		});
 	}
 
-	async claimYield(claimRequests: ClaimRequest[], overrides?: Overrides): Promise<ContractTransactionResponse> {
-		return tryCall(this.smartContractAdapter.yieldExtractor.claim(claimRequests, overrides));
-	}
+	// async claimYield(claimRequests: ClaimRequest[], overrides?: Overrides): Promise<ContractTransaction | ContractTransactionResponse> {
+	// 	return tryCall(this.smartContractAdapter.yieldExtractor.claim(claimRequests, overrides));
+	// }
 }

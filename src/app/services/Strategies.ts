@@ -1,14 +1,17 @@
 import { SmartContractAdapter } from '../../adapters/smartContract';
-import { IContractFactory } from '../ports/IContractFactory';
 import { Protocol, Strategy } from '../../types/strategies';
 import { StrategiesBackend } from '../../adapters/backend/StrategiesBackend';
+import { BrowserProvider, JsonRpcSigner } from 'ethers-v6';
+import { Signer } from 'ethers-v5';
+import { Provider } from '@ethersproject/providers';
+import { ContractAddresses } from '../../types/config';
 
 export class Strategies {
 	private smartContractAdapter: SmartContractAdapter;
 	private strategiesBackend: StrategiesBackend;
 
-	constructor(contractFactory: IContractFactory, backendUrl: string) {
-		this.smartContractAdapter = new SmartContractAdapter(contractFactory);
+	constructor(backendUrl: string, provider: BrowserProvider | JsonRpcSigner | Signer | Provider, config: ContractAddresses) {
+		this.smartContractAdapter = new SmartContractAdapter(provider, config);
 		this.strategiesBackend = new StrategiesBackend(backendUrl);
 	}
 
@@ -39,7 +42,7 @@ export class Strategies {
 				if (!protocol) {
 					throw new Error(`Protocol for ${prefix} not found`);
 				}
-				const strategyAssets = await this.smartContractAdapter.yelayLiteVault.strategyAssets(vault, index);
+				const strategyAssets = await this.smartContractAdapter.yelayLiteVault.strategyAssets(BigInt(index), vault);
 				const allocation = ((strategyAssets * 10000n) / totalAssets) / 100n;
 				return {
 					...strategy,

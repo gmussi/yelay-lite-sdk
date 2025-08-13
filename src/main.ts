@@ -1,4 +1,6 @@
-import { BrowserProvider } from 'ethers';
+import { BrowserProvider, JsonRpcSigner } from 'ethers-v6';
+import { Signer } from 'ethers-v5';
+import { Provider } from '@ethersproject/providers';
 import { ContractFactory } from './adapters/smartContract/ContractFactory';
 import { Pools } from './app/services/Pools';
 import { Vaults } from './app/services/Vaults';
@@ -25,18 +27,30 @@ export class YelayLiteSdk {
 	 * @param {ChainId} chainId - The network chainId.
 	 * @param {boolean} [testing=false] - If true and chainId is 8453, uses the testing environment; otherwise, production is used.
 	 */
-	constructor(browserProvider: BrowserProvider, chainId: ChainId, testing = false) {
+	constructor(browserProvider: BrowserProvider | JsonRpcSigner | Signer | Provider, chainId: ChainId, testing = false) {
 		const config = getEnvironment(chainId, testing);
 		const contractFactory = new ContractFactory(browserProvider, config.contracts);
 
-		this.vaults = new Vaults(contractFactory, config.backendUrl, chainId, browserProvider);
+		console.log(`browserProvider constructor name:`, browserProvider.constructor.name)		
+		if (browserProvider.constructor.name === 'BrowserProvider') {
+			console.log(`Initializing as BrowserProvider`)
+		} else if (browserProvider.constructor.name === `Signer`) {
+			console.log(`Initializing as Signer`)
+		} else if(browserProvider.constructor.name === `JsonRpcSigner`) {
+			console.log(`Initializing as JsonRpcSigner`)
+		} else {
+			console.log(`Initializing as Provider`)
+		}
 
-		this.yields = new Yield(contractFactory, config.backendUrl, chainId, browserProvider);
+		this.vaults = new Vaults(config.backendUrl, chainId, browserProvider, config.contracts);
 
-		this.pools = new Pools(contractFactory, config.backendUrl, chainId);
+		this.yields = new Yield(config.backendUrl, chainId, browserProvider, config.contracts);
 
-		this.strategies = new Strategies(contractFactory, config.backendUrl);
+		this.pools = new Pools(config.backendUrl, chainId, browserProvider, config.contracts);
+
+		this.strategies = new Strategies(config.backendUrl, browserProvider, config.contracts);
 
 		this.swapperAddress = config.contracts.Swapper;
 	}
+
 }

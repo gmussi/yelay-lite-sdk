@@ -1,7 +1,8 @@
-import { ContractTransactionResponse, ethers, Overrides, Signer } from 'ethers';
+import { ContractTransactionResponse } from 'ethers-v6';
+import { ContractTransaction, Signer, BigNumberish, PayableOverrides } from 'ethers-v5';
 import { IContractFactory } from '../../app/ports/IContractFactory';
 import { IVaultWrapper } from '../../app/ports/smartContract/IVaultWrapper';
-import { SwapArgsStruct } from '../../generated/typechain/VaultWrapper';
+import { SwapArgsStruct } from '../../generated/typechain-v6/VaultWrapper';
 import { populateGasLimit } from '../../utils/smartContract';
 
 export class VaultWrapper implements IVaultWrapper {
@@ -10,14 +11,14 @@ export class VaultWrapper implements IVaultWrapper {
 	public async depositEth(
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
-		overrides: Overrides = {},
-	): Promise<ContractTransactionResponse> {
+		amount: BigNumberish,
+		overrides: PayableOverrides = {},
+	): Promise<ContractTransaction | ContractTransactionResponse> {
 		const vaultWrapper = this.contractFactory.getVaultWrapper();
 
-		overrides.value = amount;
+		overrides.value = amount.toString();
 
-		await populateGasLimit(vaultWrapper.wrapEthAndDeposit.estimateGas, [vault, pool], overrides);
+		await populateGasLimit(vaultWrapper.estimateGas('wrapEthAndDeposit'), [vault, pool], overrides);
 
 		return await vaultWrapper.wrapEthAndDeposit(vault, pool, overrides);
 	}
@@ -31,30 +32,30 @@ export class VaultWrapper implements IVaultWrapper {
 
 	public async approveVaultWrapper(
 		tokenAddress: string,
-		amount: ethers.BigNumberish,
-		overrides: Overrides = {},
-	): Promise<ContractTransactionResponse> {
+		amount: BigNumberish,
+		overrides: PayableOverrides = {},
+	): Promise<ContractTransaction | ContractTransactionResponse> {
 		const vaultWrapper = this.contractFactory.getVaultWrapper();
 
 		await populateGasLimit(
-			this.contractFactory.getErc20(tokenAddress).approve.estimateGas,
+			this.contractFactory.getErc20(tokenAddress).estimateGas('approve'),
 			[await vaultWrapper.getAddress(), amount],
 			overrides,
 		);
 
-		return this.contractFactory.getErc20(tokenAddress).approve(await vaultWrapper.getAddress(), amount, overrides);
+		return this.contractFactory.getErc20(tokenAddress).approve(await vaultWrapper.getAddress(), amount.toString(), overrides);
 	}
 
 	public async swapAndDeposit(
 		vault: string,
 		pool: number,
 		swapData: SwapArgsStruct,
-		amount: ethers.BigNumberish,
-		overrides: Overrides = {},
-	): Promise<ContractTransactionResponse> {
+		amount: BigNumberish,
+		overrides: PayableOverrides = {},
+	): Promise<ContractTransaction | ContractTransactionResponse> {
 		const vaultWrapper = this.contractFactory.getVaultWrapper();
 
-		await populateGasLimit(vaultWrapper.swapAndDeposit.estimateGas, [vault, pool, swapData, amount], overrides);
+		await populateGasLimit(vaultWrapper.estimateGas('swapAndDeposit'), [vault, pool, swapData, amount], overrides);
 
 		return await vaultWrapper.swapAndDeposit(vault, pool, swapData, amount, overrides);
 	}
