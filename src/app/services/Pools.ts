@@ -25,7 +25,7 @@ export class Pools {
 
 		return poolsSupply.map((poolSupply, index) => ({
 			id: pools[index],
-			tvl: totalAssets.mul(poolSupply).div(totalSupply),
+			tvl: (totalAssets * poolSupply) / totalSupply,
 		}));
 	}
 

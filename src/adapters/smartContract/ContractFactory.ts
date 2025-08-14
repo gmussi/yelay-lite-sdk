@@ -1,51 +1,55 @@
-import { Provider } from '@ethersproject/providers';
-import { Signer } from 'ethers';
-
-import { MulticallWrapper } from 'ethers-multicall-provider';
+import { type Address, type Client, getContract, type Abi, GetContractReturnType, PublicClient, createPublicClient, http, WalletClient } from 'viem';
 import { IContractFactory } from '../../app/ports/IContractFactory';
-import {
-	ERC20,
-	ERC20__factory,
-	IYelayLiteVault,
-	IYelayLiteVault__factory,
-	VaultWrapper,
-	VaultWrapper__factory,
-	YieldExtractor,
-	YieldExtractor__factory,
-} from '../../generated/typechain';
+
+import VaultWrappertAbi from '../../abis/VaultWrapper.json';
+import YieldExtractorAbi from '../../abis/YieldExtractor.json';
+import ERC20Abi from '../../abis/ERC20.json';
 import { ContractAddresses } from '../../types/config';
+import { IYelayLiteVaultViem } from './viem/IYelayLiteVaultViem';
+import YelayLiteVaultViem from './viem/YelayLiteVaultViem';
+
 
 export class ContractFactory implements IContractFactory {
-	private provider: Provider;
 
-	constructor(private signerOrProvider: Signer | Provider, private contractAddresses: ContractAddresses) {
-		if (Signer.isSigner(signerOrProvider)) {
-			if (signerOrProvider.provider) {
-				this.provider = MulticallWrapper.wrap(signerOrProvider.provider);
-			} else {
-				throw new Error('Signer has no provider');
-			}
-		} else {
-			this.provider = MulticallWrapper.wrap(signerOrProvider);
-		}
+	walletClient: WalletClient;
+	publicClient: PublicClient;
+
+	constructor(
+		walletClient: WalletClient,
+		publicClient: PublicClient,
+		private contractAddresses: ContractAddresses
+	) {
+		this.walletClient = walletClient;
+		this.publicClient = publicClient;
+		this.contractAddresses = contractAddresses;
 	}
 
-	getYelayLiteVault(vault: string): IYelayLiteVault {
-		return IYelayLiteVault__factory.connect(vault, this.signerOrProvider);
+	
+	getYelayLiteVault(vault: string): IYelayLiteVaultViem {
+		return new YelayLiteVaultViem(this.walletClient, this.publicClient, vault as Address);
 	}
 
-	getVaultWrapper(): VaultWrapper {
-		return VaultWrapper__factory.connect(this.contractAddresses.VaultWrapper, this.signerOrProvider);
+	getVaultWrapper() {
+		return getContract({
+			address: this.contractAddresses.VaultWrapper as Address,
+			abi: VaultWrappertAbi.abi,
+			client: this.walletClient,
+		});
 	}
 
-	getErc20(address: string): ERC20 {
-		return ERC20__factory.connect(address, this.signerOrProvider);
+	getErc20(address: string) {
+		return getContract({
+			address: address as Address,
+			abi: ERC20Abi as Abi,
+			client: this.walletClient,
+		});
 	}
 
-	getYieldExtractor(multicall = false): YieldExtractor {
-		return YieldExtractor__factory.connect(
-			this.contractAddresses.YieldExtractor,
-			multicall ? this.provider : this.signerOrProvider,
-		);
+	getYieldExtractor(multicall = false) {
+		return getContract({
+			address: this.contractAddresses.YieldExtractor as Address,
+			abi: YieldExtractorAbi as Abi,
+			client: this.walletClient,
+		});
 	}
 }

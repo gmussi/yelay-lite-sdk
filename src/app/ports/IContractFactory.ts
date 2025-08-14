@@ -1,8 +1,8 @@
-import { ERC20, IYelayLiteVault, VaultWrapper, YieldExtractor } from '../../generated/typechain';
+import { IYelayLiteVaultViem } from '../../adapters/smartContract/viem/IYelayLiteVaultViem';
 
 export interface IContractFactory {
-	getYelayLiteVault(vault: string): IYelayLiteVault;
-	getVaultWrapper(): VaultWrapper;
-	getErc20(address: string): ERC20;
-	getYieldExtractor(multicall?: boolean): YieldExtractor;
+	getYelayLiteVault(vault: string): IYelayLiteVaultViem;
+	getVaultWrapper(): any;
+	getErc20(address: string): any;
+	getYieldExtractor(multicall?: boolean): any;
 }

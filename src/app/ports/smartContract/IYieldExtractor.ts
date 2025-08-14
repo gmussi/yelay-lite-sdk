@@ -1,15 +1,13 @@
-import { BigNumber, ContractTransaction, Overrides } from 'ethers';
-import { YieldClaimedEvent } from '../../../generated/typechain/YieldExtractor';
 import { ClaimRequest } from '../../../types';
 
 export interface IYieldExtractor {
-	getClaimedShares(user: string, vault: string, pool: number): Promise<BigNumber>;
-	claim(claimRequests: ClaimRequest[], overrides?: Overrides): Promise<ContractTransaction>;
+	getClaimedShares(user: string, vault: string, pool: number): Promise<bigint>;
+	claim(claimRequests: ClaimRequest[], overrides?: any): Promise<any>;
 	getLastClaimEvent(
 		user: string,
 		vault: string,
 		pool: number,
 		stopBlock: number,
 		latestBlock: number,
-	): Promise<YieldClaimedEvent | null>;
+	): Promise<{blockNumber: number, transactionHash: string} | null>;
 }

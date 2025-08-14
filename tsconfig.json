@@ -10,7 +10,8 @@
 		"rootDir": "src",
 		"sourceMap": true,
 		"strict": true,
-		"types": ["jest", "node"]
+		"types": ["jest", "node"],
+		"resolveJsonModule": true
 	},
 	"include": ["src/**/*"],
 	"exclude": ["node_modules", "**/__tests__/*", "tests/**/*"]
