@@ -112,15 +112,18 @@ class YelayLiteVaultViem implements IYelayLiteVaultViem {
 
     }
 
-	totalSupply() {
-		throw new Error("Method not implemented.");
+	async totalSupply() {
+		return this.contract.read.totalSupply()
+	}
+	async totalSupplyForPool(pool: number) {
+		return this.contract.read.totalSupply([pool])
 	}
 
 	ownerToClientData(client: string): { minProjectId: number; maxProjectId: number; clientName: string; } {
 		throw new Error("Method not implemented.");
 	}
-	totalAssets() {
-		throw new Error("Method not implemented.");
+	async totalAssets() {
+		return this.contract.read.totalAssets()
 	}
 	
 	migratePosition(fromPool: number, toPool: number, amount: bigint, overrides: any) {
@@ -132,12 +135,11 @@ class YelayLiteVaultViem implements IYelayLiteVaultViem {
 	projectIdActive(pool: number): boolean | PromiseLike<boolean> {
 		throw new Error("Method not implemented.");
 	}
-	
-	getActiveStrategies(): any[] {
-		throw new Error("Method not implemented.");
+	getActiveStrategies() {
+		return this.contract.read.getActiveStrategies()
 	}
 	strategyAssets(index: number): bigint | PromiseLike<bigint> {
-		throw new Error("Method not implemented.");
+		return this.contract.read.strategyAssets()
 	}
 	underlyingAsset(): Promise<Address> {
 		throw new Error("Method not implemented.");

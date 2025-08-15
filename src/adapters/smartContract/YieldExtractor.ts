@@ -28,11 +28,12 @@ export class YieldExtractor implements IYieldExtractor {
 			if (toBlock < stopBlock) {
 				return null;
 			}
-			const events = await yieldExtractor.queryFilter(
-				yieldExtractor.filters['YieldClaimed'](user, vault, pool),
-				fromBlock,
-				toBlock,
-			);
+			// const events = await yieldExtractor.queryFilter(
+			// 	yieldExtractor.filters['YieldClaimed'](user, vault, pool),
+			// 	fromBlock,
+			// 	toBlock,
+			// );
+			const events: any[] = []
 
 			if (events.length > 0) {
 				return events[events.length - 1];
@@ -54,6 +55,6 @@ export class YieldExtractor implements IYieldExtractor {
 
 		// await populateGasLimit(yieldExtractor.estimateGas.claim, [args], overrides);
 
-		return yieldExtractor.claim(args, overrides);
+		return yieldExtractor.claim(claimRequests, overrides);
 	}
 }

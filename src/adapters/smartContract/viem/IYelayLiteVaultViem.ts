@@ -3,8 +3,9 @@ import { Address } from "viem";
 export interface IYelayLiteVaultViem {
     deposit(vaultAddress: Address, pool: number, amount: bigint, overrides: any): Promise<string>;
 	redeem(vault: string, pool: number, amount: bigint, overrides?: any): Promise<string>;
-	totalAssets(): any;
-	totalSupply(): any;
+	totalAssets(): Promise<bigint>;
+	totalSupply(): Promise<bigint>;
+	totalSupplyForPool(pool: number): Promise<bigint>;
 	migratePosition(fromPool: number, toPool: number, amount: bigint, overrides: any): any;
 	activateProject(pool: number, overrides: any): any;
 	projectIdActive(pool: number): boolean | PromiseLike<boolean>;

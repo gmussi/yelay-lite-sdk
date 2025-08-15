@@ -2,7 +2,7 @@ import { IContractFactory } from '../../app/ports/IContractFactory';
 import { IYelayLiteVault, PoolsSupply } from '../../app/ports/smartContract/IYelayLiteVault';
 import { ClientData, StrategyData } from '../../types/smartContract';
 import { populateGasLimit } from '../../utils/smartContract';
-import { Address, PublicClient, WalletClient } from 'viem';
+import { Address, WalletClient } from 'viem';
 import IYelayLiteVaultAbi from '../../abis/IYelayLiteVault.json';
 
 export class YelayLiteVault implements IYelayLiteVault {
@@ -10,21 +10,16 @@ export class YelayLiteVault implements IYelayLiteVault {
 
 	public async getPoolsSupplies(vault: string, pools: number[]): Promise<PoolsSupply> {
 		const yelayLiteVault = this.contractFactory.getYelayLiteVault(vault);
-		// const [totalAssets, totalSupply, ...poolsSupply] = await Promise.all([
-		// 	yelayLiteVault.totalAssets(),
-		// 	yelayLiteVault.totalSupply(),
-		// 	...pools.map(p => yelayLiteVault['totalSupply(uint256)'](p)),
-		// ]);
-		// return {
-		// 	totalAssets,
-		// 	totalSupply,
-		// 	poolsSupply,
-		// };
 
+		const [totalAssets, totalSupply, ...poolsSupply] = await Promise.all([
+			yelayLiteVault.totalAssets(),
+			yelayLiteVault.totalSupply(),
+			...pools.map(p => yelayLiteVault.totalSupplyForPool(p)),
+		]);
 		return {
-			totalAssets: 1n,
-			totalSupply: 1n,
-			poolsSupply: [1n]
+			totalAssets,
+			totalSupply,
+			poolsSupply,
 		};
 	}
 

@@ -2,11 +2,12 @@ import { type Address, type Client, getContract, type Abi, GetContractReturnType
 import { IContractFactory } from '../../app/ports/IContractFactory';
 
 import VaultWrappertAbi from '../../abis/VaultWrapper.json';
-import YieldExtractorAbi from '../../abis/YieldExtractor.json';
 import ERC20Abi from '../../abis/ERC20.json';
 import { ContractAddresses } from '../../types/config';
 import { IYelayLiteVaultViem } from './viem/IYelayLiteVaultViem';
 import YelayLiteVaultViem from './viem/YelayLiteVaultViem';
+import YieldExtractorViem from './viem/YieldExtractorViem';
+import IYieldExtractorViem from './viem/IYieldExtractorViem';
 
 
 export class ContractFactory implements IContractFactory {
@@ -45,11 +46,7 @@ export class ContractFactory implements IContractFactory {
 		});
 	}
 
-	getYieldExtractor(multicall = false) {
-		return getContract({
-			address: this.contractAddresses.YieldExtractor as Address,
-			abi: YieldExtractorAbi as Abi,
-			client: this.walletClient,
-		});
+	getYieldExtractor(multicall = false): IYieldExtractorViem {
+		return new YieldExtractorViem(this.walletClient, this.publicClient, this.contractAddresses.YieldExtractor as Address)
 	}
 }
