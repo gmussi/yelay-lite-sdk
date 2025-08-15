@@ -11,12 +11,12 @@ class YieldExtractorViem implements IYieldExtractorViem {
     private contract: any;
 	private contractAddress: Address;
     
-    constructor(walletClient: WalletClient, publicClient: PublicClient, vaultAddress: Address) {
+    constructor(walletClient: WalletClient, publicClient: PublicClient, contractAddress: Address) {
         this.walletClient = walletClient;
         this.publicClient = publicClient;
-		this.contractAddress = vaultAddress.toLowerCase() as Address;
+		this.contractAddress = contractAddress.toLowerCase() as Address;
         this.contract = getContract({
-			address: vaultAddress,
+			address: contractAddress,
 			abi: IYelayLiteVaultAbi as Abi,
 			client: {
 				public: this.publicClient,
@@ -31,8 +31,20 @@ class YieldExtractorViem implements IYieldExtractorViem {
     async yieldSharesClaimed(user: string, vault: string, pool: number): Promise<bigint> {
         return this.contract.read.yieldSharesClaimed([user, vault, pool])
     }
-    async queryFilter(filter: any, fromBlock: number, toBlock: number): Promise<any> {
-        throw new Error("Method not implemented.");
+    async queryFilter(user: Address, vault: Address, projectId: number, fromBlock: bigint, toBlock: bigint): Promise<any> {
+        
+        const logs = await this.publicClient.getContractEvents({ 
+            address: this.contractAddress,
+            abi: IYelayLiteVaultAbi as Abi,
+            eventName: 'YieldClaimed',
+            args: {
+                user: user,
+                yelayLiteVault: vault,
+                projectId: projectId,
+            },
+            fromBlock,
+            toBlock
+          })
     }
     async claim(claimRequests: ClaimRequest[], overrides?: any): Promise<any> {
         throw new Error("Method not implemented.");

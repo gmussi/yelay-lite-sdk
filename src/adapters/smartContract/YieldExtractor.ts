@@ -1,3 +1,4 @@
+import { Address } from 'viem';
 import { IContractFactory } from '../../app/ports/IContractFactory';
 import { IYieldExtractor } from '../../app/ports/smartContract/IYieldExtractor';
 import { ClaimRequest } from '../../types';
@@ -28,12 +29,13 @@ export class YieldExtractor implements IYieldExtractor {
 			if (toBlock < stopBlock) {
 				return null;
 			}
-			// const events = await yieldExtractor.queryFilter(
-			// 	yieldExtractor.filters['YieldClaimed'](user, vault, pool),
-			// 	fromBlock,
-			// 	toBlock,
-			// );
-			const events: any[] = []
+			const events = await yieldExtractor.queryFilter(
+				user as Address,
+				vault as Address,
+				pool,
+				BigInt(fromBlock),
+				BigInt(toBlock),
+			);
 
 			if (events.length > 0) {
 				return events[events.length - 1];
