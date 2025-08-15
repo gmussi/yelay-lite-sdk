@@ -1,8 +1,9 @@
-import { Abi, Address, getContract, WalletClient } from "viem";
+import { Address, getContract, WalletClient } from "viem";
 import { PublicClient } from "viem";
 import IYelayLiteVaultAbi from '../../../abis/IYelayLiteVault.json';
 import { populateGasLimit } from "../../../utils/smartContract";
 import { IYelayLiteVaultViem } from "./IYelayLiteVaultViem";
+import { ClientData } from "../../../types";
 
 type ViemOverrides = {
 	address: Address;
@@ -17,12 +18,10 @@ class YelayLiteVaultViem implements IYelayLiteVaultViem {
     private walletClient: WalletClient;
     private publicClient: PublicClient;
     private contract: any;
-	private contractAddress: Address;
 
 	constructor(walletClient: WalletClient, publicClient: PublicClient, vaultAddress: Address) {
         this.walletClient = walletClient;
         this.publicClient = publicClient;
-		this.contractAddress = vaultAddress.toLowerCase() as Address;
         this.contract = getContract({
 			address: vaultAddress,
 			abi: IYelayLiteVaultAbi.abi,
@@ -33,9 +32,38 @@ class YelayLiteVaultViem implements IYelayLiteVaultViem {
 		});
     }
 
-	balanceOf(user: string, pool: number): bigint | PromiseLike<bigint> {
+
+	// Read functions
+
+	async getActiveStrategies(): Promise<number[]> {
+		return this.contract.read.getActiveStrategies()
+	}
+	async totalSupply() {
+		return this.contract.read.totalSupply()
+	}
+	async totalSupplyForPool(pool: number) {
+		return this.contract.read.totalSupply([pool])
+	}
+	async totalAssets() {
+		return this.contract.read.totalAssets()
+	}
+	async ownerToClientData(client: string): Promise<ClientData> {
+		return this.contract.read.ownerToClientData(client)
+	}
+	async projectIdActive(pool: number): Promise<boolean> {
+		return this.contract.read.projectIdActive([pool])
+	}
+	async strategyAssets(index: number): Promise<bigint> {
+		return this.contract.read.strategyAssets(index)
+	}
+	async underlyingAsset(): Promise<Address> {
+		return this.contract.read.underlyingAsset()
+	}
+	async balanceOf(user: string, pool: number): Promise<bigint> {
 		return this.contract.read.balanceOf([user, pool])
 	}
+
+	// Write functions
 
 	async redeem(vault: string, pool: number, amount: bigint, overrides?: ViemOverrides): Promise<string> {
 
@@ -111,44 +139,12 @@ class YelayLiteVaultViem implements IYelayLiteVaultViem {
 		return res
 
     }
-
-	async totalSupply() {
-		return this.contract.read.totalSupply()
-	}
-	async totalSupplyForPool(pool: number) {
-		return this.contract.read.totalSupply([pool])
-	}
-
-	ownerToClientData(client: string): { minProjectId: number; maxProjectId: number; clientName: string; } {
-		throw new Error("Method not implemented.");
-	}
-	async totalAssets() {
-		return this.contract.read.totalAssets()
-	}
 	
-	migratePosition(fromPool: number, toPool: number, amount: bigint, overrides: any) {
-		throw new Error("Method not implemented.");
+	async migratePosition(fromPool: number, toPool: number, amount: bigint, overrides: any) {
+		return this.contract.write.migratePosition(fromPool, toPool, amount)
 	}
-	activateProject(pool: number, overrides: any) {
-		throw new Error("Method not implemented.");
-	}
-	projectIdActive(pool: number): boolean | PromiseLike<boolean> {
-		throw new Error("Method not implemented.");
-	}
-	getActiveStrategies() {
-		return this.contract.read.getActiveStrategies()
-	}
-	strategyAssets(index: number): bigint | PromiseLike<bigint> {
-		return this.contract.read.strategyAssets()
-	}
-	underlyingAsset(): Promise<Address> {
-		throw new Error("Method not implemented.");
-	}
-	allowance(user: Address, spender: Address): Promise<bigint> {
-		throw new Error("Method not implemented.");
-	}
-	approve(spender: Address, amount: bigint): Promise<any> {
-		throw new Error("Method not implemented.");
+	async activateProject(pool: number, overrides: any) {
+		return this.contract.write.activateProject(pool, overrides)
 	}
 }
 export default YelayLiteVaultViem;

@@ -1,6 +1,6 @@
 export type ClientData = {
-	minPool: number;
-	maxPool: number;
+	minPool: bigint;
+	maxPool: bigint;
 	clientName: string;
 };
 

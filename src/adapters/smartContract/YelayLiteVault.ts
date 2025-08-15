@@ -4,7 +4,8 @@ import { ClientData, StrategyData } from '../../types/smartContract';
 import { populateGasLimit } from '../../utils/smartContract';
 import { Address, WalletClient } from 'viem';
 import IYelayLiteVaultAbi from '../../abis/IYelayLiteVault.json';
-
+import { fromBytes } from 'viem/utils';
+import { hexToBytes } from 'viem';
 export class YelayLiteVault implements IYelayLiteVault {
 	constructor(private contractFactory: IContractFactory) {}
 
@@ -145,11 +146,11 @@ export class YelayLiteVault implements IYelayLiteVault {
 
 	async clientData(client: string, vault: string): Promise<ClientData> {
 		const result = await this.contractFactory.getYelayLiteVault(vault).ownerToClientData(client);
+		
 		return {
-			minPool: Number(result.minProjectId),
-			maxPool: Number(result.maxProjectId),
-			// clientName: parseBytes32String(result.clientName),
-			clientName: result.clientName,
+			minPool: result.minPool,
+			maxPool: result.maxPool,
+			clientName: fromBytes(hexToBytes(result.clientName as Address), 'string'),
 		};
 	}
 
@@ -159,8 +160,7 @@ export class YelayLiteVault implements IYelayLiteVault {
 
 	async activeStrategies(vault: string): Promise<StrategyData[]> {
 		return (await this.contractFactory.getYelayLiteVault(vault).getActiveStrategies()).map((s: any) => ({
-			// name: parseBytes32String(s.name),
-			name: s.name,
+			name: fromBytes(hexToBytes(s.name as Address), 'string'),
 		}));
 	}
 

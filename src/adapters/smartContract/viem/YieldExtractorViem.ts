@@ -24,10 +24,6 @@ class YieldExtractorViem implements IYieldExtractorViem {
 			},
 		});
     }
-    async filter(filter: any, fromBlock: number, toBlock: number): Promise<any> {
-        throw new Error("Method not implemented.");
-    }
-    
     async yieldSharesClaimed(user: string, vault: string, pool: number): Promise<bigint> {
         return this.contract.read.yieldSharesClaimed([user, vault, pool])
     }
@@ -45,11 +41,14 @@ class YieldExtractorViem implements IYieldExtractorViem {
             fromBlock,
             toBlock
           })
+          return logs
     }
     async claim(claimRequests: ClaimRequest[], overrides?: any): Promise<any> {
         throw new Error("Method not implemented.");
     }
-
+    async filter(filter: any, fromBlock: number, toBlock: number): Promise<any> {
+        throw new Error("Method not implemented.");
+    }
 }
 
 export default YieldExtractorViem;
