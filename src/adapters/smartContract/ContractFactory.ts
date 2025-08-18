@@ -1,13 +1,15 @@
-import { type Address, type Client, getContract, type Abi, GetContractReturnType, PublicClient, createPublicClient, http, WalletClient } from 'viem';
+import { type Address, PublicClient, WalletClient } from 'viem';
 import { IContractFactory } from '../../app/ports/IContractFactory';
 
-import VaultWrappertAbi from '../../abis/VaultWrapper.json';
-import ERC20Abi from '../../abis/ERC20.json';
 import { ContractAddresses } from '../../types/config';
 import { IYelayLiteVaultViem } from './viem/IYelayLiteVaultViem';
 import YelayLiteVaultViem from './viem/YelayLiteVaultViem';
 import YieldExtractorViem from './viem/YieldExtractorViem';
 import IYieldExtractorViem from './viem/IYieldExtractorViem';
+import Erc20Viem from './viem/Erc20Viem';
+import VaultWrapperViem from './viem/VaultWrapperViem';
+import IVaultWrapperViem from './viem/IVaultWrapperViem';
+import IErc20Viem from './viem/IErc20Viem';
 
 
 export class ContractFactory implements IContractFactory {
@@ -30,20 +32,12 @@ export class ContractFactory implements IContractFactory {
 		return new YelayLiteVaultViem(this.walletClient, this.publicClient, vault as Address);
 	}
 
-	getVaultWrapper() {
-		return getContract({
-			address: this.contractAddresses.VaultWrapper as Address,
-			abi: VaultWrappertAbi.abi,
-			client: this.walletClient,
-		});
+	getVaultWrapper(): IVaultWrapperViem {
+		return new VaultWrapperViem(this.walletClient, this.publicClient, this.contractAddresses.VaultWrapper as Address)
 	}
 
-	getErc20(address: string) {
-		return getContract({
-			address: address as Address,
-			abi: ERC20Abi as Abi,
-			client: this.walletClient,
-		});
+	getErc20(address: string): IErc20Viem {
+		return new Erc20Viem(this.walletClient, this.publicClient, address as Address)
 	}
 
 	getYieldExtractor(multicall = false): IYieldExtractorViem {

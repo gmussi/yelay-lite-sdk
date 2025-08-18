@@ -1,9 +1,7 @@
 import { IContractFactory } from '../../app/ports/IContractFactory';
 import { IYelayLiteVault, PoolsSupply } from '../../app/ports/smartContract/IYelayLiteVault';
 import { ClientData, StrategyData } from '../../types/smartContract';
-import { populateGasLimit } from '../../utils/smartContract';
 import { Address, WalletClient } from 'viem';
-import IYelayLiteVaultAbi from '../../abis/IYelayLiteVault.json';
 import { fromBytes } from 'viem/utils';
 import { hexToBytes } from 'viem';
 export class YelayLiteVault implements IYelayLiteVault {
@@ -33,32 +31,29 @@ export class YelayLiteVault implements IYelayLiteVault {
 		const underlying = await this.contractFactory.getYelayLiteVault(vault).underlyingAsset();
 		const userAddressList = await walletClient.getAddresses();
 		const userAddress = userAddressList[0]
-		return this.contractFactory.getErc20(tokenAddress ? tokenAddress : underlying).allowance([userAddress, vault]);
+		return this.contractFactory.getErc20(tokenAddress ? tokenAddress : underlying).allowance(userAddress, vault);
 	}
 
 	async approve(vault: string, amount: bigint, overrides: any = {}): Promise<any> {
 		const yelayLiteVault = this.contractFactory.getYelayLiteVault(vault);
 		const underlyingAsset = await yelayLiteVault.underlyingAsset();
 		// const userAddressList = await walletClient.getAddresses()
-		const userAddress = 'userAddressList[0]'
-		overrides = {
-			address: vault as Address,
-			abi: IYelayLiteVaultAbi.abi	,
-			functionName: 'approve',
-			args: [vault, amount],
-			account: userAddress,
-		}
+		// const userAddress = 'userAddressList[0]'
+		// overrides = {
+		// 	address: vault as Address,
+		// 	abi: IYelayLiteVaultAbi.abi	,
+		// 	functionName: 'approve',
+		// 	args: [vault, amount],
+		// 	account: userAddress,
+		// }
 
-		await populateGasLimit(
-			this.contractFactory.getErc20(underlyingAsset).estimateGas.approve,
-			[vault, amount],
-			overrides,
-		);
+		// await populateGasLimit(
+		// 	this.contractFactory.getErc20(underlyingAsset).estimateGas.approve,
+		// 	[vault, amount],
+		// 	overrides,
+		// );
 
-		return this.contractFactory.getErc20(underlyingAsset).approve([vault, amount], {
-			account: userAddress,
-			gas: overrides.gas,
-		});
+		return this.contractFactory.getErc20(underlyingAsset).approve(vault, amount);
 	}
 
 	async deposit(
@@ -67,38 +62,7 @@ export class YelayLiteVault implements IYelayLiteVault {
 		amount: bigint,
 		overrides: any = {},
 	): Promise<any> {
-		// const userAddressList = await walletClient.getAddresses()
-		// const userAddress = userAddressList[0]
-
 		return this.contractFactory.getYelayLiteVault(vault).deposit(vault as Address, pool, amount, overrides)
-
-		// const userAddressList = await walletClient.getAddresses()
-		// const userAddress = userAddressList[0]
-
-		// overrides = {
-		// 	address: vault as Address,
-		// 	abi: IYelayLiteVaultAbi.abi	,
-		// 	functionName: 'deposit',
-		// 	args: [amount, pool, userAddress],
-		// }
-		// console.log(`overrides`, overrides)
-
-		// this.contractFactory.publicClient.estimateContractGas(overrides)
-		// const gasEstimation = await yelayLiteVault.estimateContractGas(overrides)
-		// console.log(`gasEstimation`, gasEstimation)
-
-		// await populateGasLimit(
-		// 	yelayLiteVault.estimateContractGas,
-		// 	[overrides],
-		// 	overrides
-		// );
-
-		// console.log(`populateGasLimitDone`)
-		// return yelayLiteVault.write.deposit([amount, pool, userAddress],   
-		// 	{
-		// 		gas: overrides.gas,
-		// 	}
-		// );
 	}
 
 	async redeem(
@@ -122,21 +86,10 @@ export class YelayLiteVault implements IYelayLiteVault {
 		amount: bigint,
 		overrides: any = {},
 	): Promise<any> {
-		// await populateGasLimit(
-		// 	this.contractFactory.getYelayLiteVault(vault).estimateGas.migratePosition,
-		// 	[fromPool, toPool, amount],
-		// 	overrides,
-		// );
 		return this.contractFactory.getYelayLiteVault(vault).migratePosition(fromPool, toPool, amount, overrides);
 	}
 
 	async activatePool(vault: string, pool: number, overrides: any = {}): Promise<any> {
-		// await populateGasLimit(
-		// 	this.contractFactory.getYelayLiteVault(vault).estimateGas.activateProject,
-		// 	[pool],
-		// 	overrides,
-		// );
-
 		return this.contractFactory.getYelayLiteVault(vault).activateProject(pool, overrides);
 	}
 

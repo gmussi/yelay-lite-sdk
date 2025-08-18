@@ -5,7 +5,7 @@ import { populateGasLimit } from "../../../utils/smartContract";
 import { IYelayLiteVaultViem } from "./IYelayLiteVaultViem";
 import { ClientData } from "../../../types";
 
-type ViemOverrides = {
+export type ViemOverrides = {
 	address: Address;
 	abi: any; // Using any for now since the JSON ABI doesn't match Viem's strict Abi type
 	functionName: string;
@@ -48,13 +48,13 @@ class YelayLiteVaultViem implements IYelayLiteVaultViem {
 		return this.contract.read.totalAssets()
 	}
 	async ownerToClientData(client: string): Promise<ClientData> {
-		return this.contract.read.ownerToClientData(client)
+		return this.contract.read.ownerToClientData([client])
 	}
 	async projectIdActive(pool: number): Promise<boolean> {
 		return this.contract.read.projectIdActive([pool])
 	}
 	async strategyAssets(index: number): Promise<bigint> {
-		return this.contract.read.strategyAssets(index)
+		return this.contract.read.strategyAssets([index])
 	}
 	async underlyingAsset(): Promise<Address> {
 		return this.contract.read.underlyingAsset()
@@ -64,7 +64,6 @@ class YelayLiteVaultViem implements IYelayLiteVaultViem {
 	}
 
 	// Write functions
-
 	async redeem(vault: string, pool: number, amount: bigint, overrides?: ViemOverrides): Promise<string> {
 
 		const addressList = await this.walletClient.getAddresses()

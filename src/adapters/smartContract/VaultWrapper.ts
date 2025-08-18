@@ -16,8 +16,6 @@ export class VaultWrapper implements IVaultWrapper {
 
 		overrides.value = amount;
 
-		// await populateGasLimit(vaultWrapper.estimateGas.wrapEthAndDeposit, [vault, pool], overrides);
-
 		return await vaultWrapper.wrapEthAndDeposit(vault, pool, overrides);
 	}
 
@@ -36,12 +34,7 @@ export class VaultWrapper implements IVaultWrapper {
 	): Promise<any> {
 		const vaultWrapper = this.contractFactory.getVaultWrapper();
 
-		// await populateGasLimit(
-		// 	this.contractFactory.getErc20(tokenAddress).estimateGas.approve,
-		// 	[vaultWrapper.address, amount],
-		// 	overrides,
-		// );
-
+	
 		return this.contractFactory.getErc20(tokenAddress).approve(vaultWrapper.address, amount, overrides);
 	}
 
