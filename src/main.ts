@@ -1,4 +1,4 @@
-import { BrowserProvider } from 'ethers';
+import { BrowserProvider, Signer } from 'ethers';
 import { ContractFactory } from './adapters/smartContract/ContractFactory';
 import { Pools } from './app/services/Pools';
 import { Vaults } from './app/services/Vaults';
@@ -25,7 +25,7 @@ export class YelayLiteSdk {
 	 * @param {ChainId} chainId - The network chainId.
 	 * @param {boolean} [testing=false] - If true and chainId is 8453, uses the testing environment; otherwise, production is used.
 	 */
-	constructor(browserProvider: BrowserProvider, chainId: ChainId, testing = false) {
+	constructor(browserProvider: BrowserProvider | Signer, chainId: ChainId, testing = false) {
 		const config = getEnvironment(chainId, testing);
 		const contractFactory = new ContractFactory(browserProvider, config.contracts);
 

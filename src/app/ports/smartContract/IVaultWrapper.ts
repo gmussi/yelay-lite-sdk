@@ -5,20 +5,20 @@ export interface IVaultWrapper {
 	depositEth(
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides?: any,
 	): Promise<ContractTransactionResponse>;
 	vaultWrapperAllowance(signer: Signer, tokenAddress: string): Promise<bigint>;
 	approveVaultWrapper(
 		tokenAddress: string,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides?: Overrides,
 	): Promise<ContractTransactionResponse>;
 	swapAndDeposit(
 		vault: string,
 		pool: number,
 		swapData: SwapArgsStruct,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides?: any,
 	): Promise<ContractTransactionResponse>;
 }

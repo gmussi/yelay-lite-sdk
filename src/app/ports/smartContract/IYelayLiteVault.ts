@@ -10,26 +10,26 @@ export type PoolsSupply = {
 export interface IYelayLiteVault {
 	getPoolsSupplies(vault: string, pools: number[]): Promise<PoolsSupply>;
 	allowance(signer: Signer, vault: string): Promise<bigint>;
-	approve(vault: string, amount: ethers.BigNumberish, overrides?: Overrides): Promise<ContractTransactionResponse>;
+	approve(vault: string, amount: BigInt, overrides?: Overrides): Promise<ContractTransactionResponse>;
 	deposit(
 		signer: Signer,
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides?: Overrides,
 	): Promise<ContractTransactionResponse>;
 	redeem(
 		signer: Signer,
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides?: Overrides,
 	): Promise<ContractTransactionResponse>;
 	migrate(
 		vault: string,
 		fromPool: number,
 		toPool: number,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides?: Overrides,
 	): Promise<ContractTransactionResponse>;
 	activatePool(vault: string, pool: number, overrides?: Overrides): Promise<ContractTransactionResponse>;

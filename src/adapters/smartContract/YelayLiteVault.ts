@@ -34,68 +34,70 @@ export class YelayLiteVault implements IYelayLiteVault {
 		return this.contractFactory.getErc20(tokenAddress ? tokenAddress : underlying).allowance(userAddress, vault);
 	}
 
-	async approve(vault: string, amount: ethers.BigNumberish, overrides: Overrides = {}): Promise<ContractTransactionResponse> {
+	async approve(vault: string, amount: BigInt, overrides: Overrides = {}): Promise<ContractTransactionResponse> {
 		const yelayLiteVault = this.contractFactory.getYelayLiteVault(vault);
 		const underlyingAsset = await yelayLiteVault.underlyingAsset();
 
 		await populateGasLimit(
 			this.contractFactory.getErc20(underlyingAsset).approve.estimateGas,
-			[vault, amount],
+			[vault, amount.toString()],
 			overrides,
 		);
 
-		return this.contractFactory.getErc20(underlyingAsset).approve(vault, amount, overrides);
+		return this.contractFactory.getErc20(underlyingAsset).approve(vault, amount.toString(), overrides);
 	}
 
 	async deposit(
 		signer: Signer,
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides: Overrides = {},
 	): Promise<ContractTransactionResponse> {
-		const userAddress = await signer.getAddress();
+		const userAddress = (await signer.getAddress()).toLowerCase();
+
+		const yelayLiteVault = this.contractFactory.getYelayLiteVault(vault)
 
 		await populateGasLimit(
-			this.contractFactory.getYelayLiteVault(vault).deposit.estimateGas,
-			[amount, pool, userAddress],
+			yelayLiteVault.deposit.estimateGas,
+			[amount.toString(), pool, userAddress],
 			overrides,
 		);
 
-		return this.contractFactory.getYelayLiteVault(vault).deposit(amount, pool, userAddress, overrides);
+		return yelayLiteVault.deposit(amount.toString(), pool, userAddress, overrides);
 	}
 
 	async redeem(
 		signer: Signer,
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides: Overrides = {},
 	): Promise<ContractTransactionResponse> {
 		const userAddress = await signer.getAddress();
 
 		await populateGasLimit(
 			this.contractFactory.getYelayLiteVault(vault).redeem.estimateGas,
-			[amount, pool, userAddress],
+			[amount.toString(), pool, userAddress],
 			overrides,
 		);
 
-		return this.contractFactory.getYelayLiteVault(vault).redeem(amount, pool, userAddress, overrides);
+		return this.contractFactory.getYelayLiteVault(vault).redeem(amount.toString(), pool, userAddress, overrides);
 	}
 
 	async migrate(
 		vault: string,
 		fromPool: number,
 		toPool: number,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides: Overrides = {},
 	): Promise<ContractTransactionResponse> {
 		await populateGasLimit(
 			this.contractFactory.getYelayLiteVault(vault).migratePosition.estimateGas,
-			[fromPool, toPool, amount],
+			[fromPool, toPool, amount.toString()],
 			overrides,
 		);
-		return this.contractFactory.getYelayLiteVault(vault).migratePosition(fromPool, toPool, amount, overrides);
+		return this.contractFactory.getYelayLiteVault(vault).migratePosition(fromPool, toPool, amount.toString(), overrides);
 	}
 
 	async activatePool(vault: string, pool: number, overrides: Overrides = {}): Promise<ContractTransactionResponse> {

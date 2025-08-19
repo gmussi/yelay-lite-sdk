@@ -1,4 +1,4 @@
-import { BrowserProvider } from 'ethers';
+import { BrowserProvider, Signer } from 'ethers';
 import { IContractFactory } from '../../app/ports/IContractFactory';
 import {
 	ERC20,
@@ -13,20 +13,10 @@ import {
 import { ContractAddresses } from '../../types/config';
 
 export class ContractFactory implements IContractFactory {
-	private browserProvider: BrowserProvider;
+	private browserProvider: BrowserProvider | Signer;
 
-	constructor(private _browserProvider: BrowserProvider, private contractAddresses: ContractAddresses) {
+	constructor(_browserProvider: BrowserProvider | Signer, private contractAddresses: ContractAddresses) {
 		this.browserProvider = _browserProvider;
-		// if (isSigner(signerOrProvider)) {
-			
-		// 	if (signerOrProvider.provider) {
-		// 		this.provider = MulticallWrapper.wrap(signerOrProvider);
-		// 	} else {
-		// 		throw new Error('Signer has no provider');
-		// 	}
-		// } else {
-		// 	this.provider = MulticallWrapper.wrap(signerOrProvider);
-		// }
 	}
 
 	getYelayLiteVault(vault: string): IYelayLiteVault {

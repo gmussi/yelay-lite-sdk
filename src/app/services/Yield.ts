@@ -1,4 +1,4 @@
-import { BrowserProvider, ContractTransactionResponse, ethers, Overrides } from 'ethers';
+import { BrowserProvider, ContractTransactionResponse, ethers, Overrides, Signer } from 'ethers';
 import { YieldBackend } from '../../adapters/backend/YieldBackend';
 import { SmartContractAdapter } from '../../adapters/smartContract';
 import { TimeFrame } from '../../types/backend';
@@ -20,13 +20,13 @@ import { IContractFactory } from '../ports/IContractFactory';
 export class Yield {
 	private smartContractAdapter: SmartContractAdapter;
 	private yieldBackend: IYieldBackend;
-	private browserProvider: BrowserProvider;
+	private browserProvider: BrowserProvider | Signer;
 
 	constructor(
 		contractFactory: IContractFactory,
 		backendUrl: string,
 		chainId: ChainId,
-		_browserProvider: BrowserProvider,
+		_browserProvider: BrowserProvider | Signer,
 	) {
 		this.smartContractAdapter = new SmartContractAdapter(contractFactory);
 		this.yieldBackend = new YieldBackend(backendUrl, chainId);

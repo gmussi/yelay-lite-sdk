@@ -16,13 +16,13 @@ function isSigner(obj: any): obj is Signer {
 export class Vaults {
 	private smartContractAdapter: SmartContractAdapter;
 	private vaultsBackend: IVaultsBackend;
-	private browserProvider: BrowserProvider;
+	private browserProvider: BrowserProvider | Signer;
 
 	constructor(
 		contractFactory: IContractFactory,
 		backendUrl: string,
 		chainId: number,
-		_browserProvider: BrowserProvider,
+		_browserProvider: BrowserProvider | Signer,
 	) {
 		this.smartContractAdapter = new SmartContractAdapter(contractFactory);
 		this.vaultsBackend = new VaultsBackend(backendUrl, chainId);
@@ -41,7 +41,7 @@ export class Vaults {
 	 * Deposits a specified amount of ETH into a pool in the vault.
 	 * @param {string} vault - The address of the vault.
 	 * @param {number} pool - The pool ID.
-	 * @param {ethers.BigNumberish} amount - The amount of ETH to deposit (in wei).
+	 * @param {BigInt} amount - The amount of ETH to deposit (in wei).
 	 * @param {Overrides} overrides - Ethers overrides.
 	 * @returns {Promise<CallResult>} A promise that resolves to the result of the deposit transaction.
 	 *
@@ -51,7 +51,7 @@ export class Vaults {
 	public async depositEth(
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides?: Overrides,
 	): Promise<ContractTransactionResponse> {
 		return tryCall(this.smartContractAdapter.vaultWrapper.depositEth(vault, pool, amount, overrides));
@@ -108,24 +108,24 @@ export class Vaults {
 	/**
 	 * Approves the vault to spend a specified amount of tokens on behalf of the user.
 	 * @param {string} vault - The address of the vault.
-	 * @param {ethers.BigNumberish} amount - The amount to approve.
+	 * @param {BigInt} amount - The amount to approve.
 	 * @param {Overrides} overrides - Ethers overrides.
 	 * @returns {Promise<ContractTransactionResponse>} A promise that resolves to the result of the approval transaction.
 	 */
-	async approve(vault: string, amount: ethers.BigNumberish, overrides?: Overrides): Promise<ContractTransactionResponse> {
+	async approve(vault: string, amount: BigInt, overrides?: Overrides): Promise<ContractTransactionResponse> {
 		return tryCall(this.smartContractAdapter.yelayLiteVault.approve(vault, amount, overrides));
 	}
 
 	/**
 	 * Approves the vault to spend a specified amount of tokens on behalf of the user.
 	 * @param {string} tokenAddress - The address of the token.
-	 * @param {ethers.BigNumberish} amount - The amount to approve.
+	 * @param {BigInt} amount - The amount to approve.
 	 * @param {Overrides} overrides - Ethers overrides.
 	 * @returns {Promise<ContractTransactionResponse>} A promise that resolves to the result of the approval transaction.
 	 */
 	async approveVaultWrapper(
 		tokenAddress: string,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides?: Overrides,
 	): Promise<ContractTransactionResponse> {
 		return tryCall(this.smartContractAdapter.vaultWrapper.approveVaultWrapper(tokenAddress, amount, overrides));
@@ -147,14 +147,14 @@ export class Vaults {
 	 * Deposits a specified amount into a pool in the vault.
 	 * @param {string} vault - The address of the vault.
 	 * @param {number} pool - The pool ID.
-	 * @param {ethers.BigNumberish} amount - The amount to deposit.
+	 * @param {BigInt} amount - The amount to deposit.
 	 * @param {Overrides} overrides - Ethers overrides.
 	 * @returns {Promise<ContractTransactionResponse>} A promise that resolves to the result of the deposit transaction.
 	 */
 	async deposit(
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides?: Overrides,
 	): Promise<ContractTransactionResponse> {
 		if (!isSigner(this.browserProvider)) {
@@ -170,7 +170,7 @@ export class Vaults {
 	 * Deposits a specified amount into a pool in the vault.
 	 * @param {string} vault - The address of the vault.
 	 * @param {number} pool - The pool ID.
-	 * @param {ethers.BigNumberish} amount - The amount to deposit.
+	 * @param {BigInt} amount - The amount to deposit.
 	 * @param {SwapArgsStruct} swapData - Swap args from 1inch.
 	 * @param {Overrides} callOverrides - Ethers overrides.
 	 * @returns {Promise<ContractTransactionResponse>} A promise that resolves to the result of the deposit transaction.
@@ -178,7 +178,7 @@ export class Vaults {
 	async swapAndDeposit(
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		swapData: SwapArgsStruct,
 		callOverrides?: Overrides,
 	): Promise<ContractTransactionResponse> {
@@ -191,14 +191,14 @@ export class Vaults {
 	 * Withdraws a specified amount from a pool in the vault.
 	 * @param {string} vault - The address of the vault.
 	 * @param {number} pool - The pool ID.
-	 * @param {ethers.BigNumberish} amount - The amount to withdraw.\
+	 * @param {BigInt} amount - The amount to withdraw.\
 	 * @param {Overrides} overrides - Ethers overrides.
 	 * @returns {Promise<ContractTransactionResponse>} A promise that resolves to the result of the withdrawal transaction.
 	 */
 	async redeem(
 		vault: string,
 		pool: number,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides?: Overrides,
 	): Promise<ContractTransactionResponse> {
 		if (!isSigner(this.browserProvider)) {
@@ -225,7 +225,7 @@ export class Vaults {
 	 * @param {string} vault - The address of the vault.
 	 * @param {number} fromPool - The ID of the pool to migrate from.
 	 * @param {number} toPool - The ID of the pool to migrate to.
-	 * @param {ethers.BigNumberish} amount - The amount to migrate.
+	 * @param {BigInt} amount - The amount to migrate.
 	 * @param {Overrides} overrides - Ethers overrides.
 	 * @returns {Promise<ContractTransactionResponse>} A promise that resolves to the result of the migration transaction.
 	 */
@@ -233,7 +233,7 @@ export class Vaults {
 		vault: string,
 		fromPool: number,
 		toPool: number,
-		amount: ethers.BigNumberish,
+		amount: BigInt,
 		overrides?: Overrides,
 	): Promise<ContractTransactionResponse> {
 		return this.smartContractAdapter.yelayLiteVault.migrate(vault, fromPool, toPool, amount, overrides);
