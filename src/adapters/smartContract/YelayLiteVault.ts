@@ -1,10 +1,16 @@
-import { ContractTransactionResponse, ethers, Overrides, Signer } from 'ethers';
-import { encodeBytes32String } from "ethers";
+import { ContractTransactionResponse, ethers, getBytes, Overrides, Signer, toUtf8String } from 'ethers';
 
 import { IContractFactory } from '../../app/ports/IContractFactory';
 import { IYelayLiteVault, PoolsSupply } from '../../app/ports/smartContract/IYelayLiteVault';
 import { ClientData, StrategyData } from '../../types/smartContract';
 import { populateGasLimit } from '../../utils/smartContract';
+
+function parseBytes32String(bytes32: string): string {
+    const bytes = getBytes(bytes32);
+    const nullIndex = bytes.indexOf(0);
+    const sliced = nullIndex === -1 ? bytes : bytes.slice(0, nullIndex);
+    return toUtf8String(sliced);
+}
 
 export class YelayLiteVault implements IYelayLiteVault {
 	constructor(private contractFactory: IContractFactory) {}
@@ -119,7 +125,7 @@ export class YelayLiteVault implements IYelayLiteVault {
 		return {
 			minPool: Number(result.minProjectId),
 			maxPool: Number(result.maxProjectId),
-			clientName: encodeBytes32String(result.clientName),
+			clientName: parseBytes32String(result.clientName),
 			
 		};
 	}
@@ -130,7 +136,7 @@ export class YelayLiteVault implements IYelayLiteVault {
 
 	async activeStrategies(vault: string): Promise<StrategyData[]> {
 		return (await this.contractFactory.getYelayLiteVault(vault).getActiveStrategies()).map(s => ({
-			name: encodeBytes32String(s.name),
+			name: parseBytes32String(s.name),
 			
 		}));
 	}
